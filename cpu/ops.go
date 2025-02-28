@@ -1,7 +1,8 @@
 package cpu
 
+import "fmt"
+
 type Operation struct {
-	Code        uint8
 	Name        string
 	AddressMode AddressMode
 	Size        uint16
@@ -9,26 +10,28 @@ type Operation struct {
 	Do          func(*CPU)
 }
 
-var ops = []Operation{
-	//opcode name addrmode size ticks do
-	{0xea, "nop", amImmediate, 1, 2, nop},
+var ops = [256]*Operation{
+	//opcode: name addrmode size ticks do
+	0xea: {"nop", amImm, 1, 2, nop},
 
-	{0xa9, "lda", amImmediate, 2, 2, lda},
-	{0xa5, "lda", amZeroPage, 2, 3, lda},
-	{0xb5, "lda", amZeroPageX, 2, 4, lda},
-	{0xad, "lda", amAbsolute, 3, 4, lda},
-	{0xbd, "lda", amAbsoluteX, 3, 4, lda},
-	{0xd9, "lda", amAbsoluteY, 3, 4, lda},
-	{0xa1, "lda", amIndirectX, 2, 6, lda},
-	{0xb1, "lda", amIndirectY, 2, 5, lda},
+	0xa9: {"lda", amImm, 2, 2, lda},
+	0xa5: {"lda", amZeP, 2, 3, lda},
+	0xb5: {"lda", amZeX, 2, 4, lda},
+	0xad: {"lda", amAbs, 3, 4, lda},
+	0xbd: {"lda", amAbX, 3, 4, lda},
+	0xb9: {"lda", amAbY, 3, 4, lda},
+	0xa1: {"lda", amInX, 2, 6, lda},
+	0xb1: {"lda", amInY, 2, 5, lda},
 }
 
-var opcode2op [256]*Operation
+func opcode2op(opcode uint8) *Operation {
+	op := ops[opcode]
 
-func InitOpcodes() {
-	for _, op := range ops {
-		opcode2op[op.Code] = &op
+	if op == nil {
+		panic(fmt.Sprintf("Unknown opcode 0x%02x", opcode))
 	}
+
+	return op
 }
 
 func nop(_ *CPU) {}

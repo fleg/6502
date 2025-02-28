@@ -3,17 +3,17 @@ package cpu
 type AddressMode uint8
 
 const (
-	amImpilict AddressMode = iota
-	amAccumulator
-	amImmediate
-	amZeroPage
-	amZeroPageX
-	amZeroPageY
-	amRelative
-	amAbsolute
-	amAbsoluteX
-	amAbsoluteY
-	amIndirect
-	amIndirectX
-	amIndirectY
+	amImp AddressMode = iota
+	amAcc
+	amImm
+	amZeP
+	amZeX
+	amZeY
+	amRel
+	amAbs
+	amAbX
+	amAbY
+	amInd
+	amInX
+	amInY
 )

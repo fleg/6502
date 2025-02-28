@@ -1,7 +1,5 @@
 package cpu
 
-import "fmt"
-
 const (
 	resetVector = 0xfffc
 	stackInit   = 0xfd
@@ -16,11 +14,10 @@ type CPU struct {
 	Y  uint8
 	PS Flags
 
-	Memory         Memory
-	TotalTicks     uint64
-	CurrentOpTicks uint8
-	CurrentOp      *Operation
-	IsPageCrossed  bool
+	Memory        Memory
+	TotalTicks    uint64
+	CurrentOp     *Operation
+	IsPageCrossed bool
 }
 
 func New() *CPU {
@@ -38,31 +35,19 @@ func (cpu *CPU) Reset() {
 	cpu.setFlag(flagInterrupt, true)
 }
 
-func (cpu *CPU) Tick() bool {
-	cpu.TotalTicks += 1
-
-	if cpu.CurrentOpTicks > 0 {
-		cpu.CurrentOpTicks -= 1
-		return false
-	}
-
+func (cpu *CPU) Step() {
 	cpu.nextOp()
 
-	cpu.CurrentOpTicks = cpu.CurrentOp.Ticks - 1
-	if cpu.hasExtraTickOnPageCross() {
-		cpu.CurrentOpTicks += 1
-	}
+	cpu.TotalTicks += uint64(cpu.CurrentOp.Ticks)
 
-	return true
+	if cpu.hasExtraTickOnPageCross() {
+		cpu.TotalTicks += 1
+	}
 }
 
 func (cpu *CPU) nextOp() {
 	opcode := cpu.Memory.Read(cpu.PC)
-	op := opcode2op[opcode]
-
-	if op == nil {
-		panic(fmt.Sprintf("Unknown opcode 0x%02x", opcode))
-	}
+	op := opcode2op(opcode)
 
 	cpu.CurrentOp = op
 
@@ -72,7 +57,7 @@ func (cpu *CPU) nextOp() {
 }
 
 func (cpu *CPU) getOperand(am AddressMode) uint8 {
-	if am == amAccumulator {
+	if am == amAcc {
 		return cpu.A
 	}
 
@@ -85,27 +70,27 @@ func (cpu *CPU) getOperand(am AddressMode) uint8 {
 
 func (cpu *CPU) getOperandAddress(am AddressMode) uint16 {
 	switch am {
-	case amImmediate:
+	case amImm:
 		return cpu.PC + 1
-	case amZeroPage:
+	case amZeP:
 		return uint16(cpu.Memory.Read(cpu.PC + 1))
-	case amZeroPageX:
+	case amZeX:
 		return uint16(cpu.Memory.Read(cpu.PC+1)+cpu.X) % 0x100
-	case amZeroPageY:
+	case amZeY:
 		return uint16(cpu.Memory.Read(cpu.PC+1)+cpu.Y) % 0x100
-	case amRelative:
+	case amRel:
 		return uint16(int32(cpu.PC) + 2 + int32(int8(cpu.Memory.Read(cpu.PC+1))))
-	case amAbsolute:
+	case amAbs:
 		return cpu.Memory.ReadWord(cpu.PC + 1)
-	case amAbsoluteX:
-		return cpu.Memory.ReadWord(cpu.PC + 1 + uint16(cpu.X))
-	case amAbsoluteY:
-		return cpu.Memory.ReadWord(cpu.PC + 1 + uint16(cpu.Y))
-	case amIndirect:
+	case amAbX:
+		return cpu.Memory.ReadWord(cpu.PC+1) + uint16(cpu.X)
+	case amAbY:
+		return cpu.Memory.ReadWord(cpu.PC+1) + uint16(cpu.Y)
+	case amInd:
 		return cpu.Memory.ReadWord(cpu.Memory.ReadWord(cpu.PC + 1))
-	case amIndirectX:
+	case amInX:
 		return cpu.Memory.ReadWord((uint16(cpu.Memory.Read(cpu.PC+1)) + uint16(cpu.X)) % 0x100)
-	case amIndirectY:
+	case amInY:
 		return cpu.Memory.ReadWord((uint16(cpu.Memory.Read(cpu.PC+1)))%0x100) + uint16(cpu.Y)
 	default:
 		panic("Unknown address mode")
@@ -118,7 +103,7 @@ func (cpu *CPU) hasExtraTickOnPageCross() bool {
 	}
 
 	switch cpu.CurrentOp.AddressMode {
-	case amAbsoluteX, amAbsoluteY, amIndirectY:
+	case amAbX, amAbY, amInY:
 		return true
 	}
 
