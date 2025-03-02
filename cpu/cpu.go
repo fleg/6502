@@ -35,18 +35,12 @@ func (cpu *CPU) Reset() {
 }
 
 func (cpu *CPU) Step() {
-	cpu.nextOp()
-
-	cpu.TotalTicks += uint64(cpu.CurrentOp.Ticks)
-
-	// TODO handle extra page cross ticks
-}
-
-func (cpu *CPU) nextOp() {
 	opcode := cpu.Memory.Read(cpu.PC)
 	op := opcode2op(opcode)
 
 	cpu.CurrentOp = op
+	cpu.TotalTicks += uint64(cpu.CurrentOp.Ticks)
+	// TODO handle extra page cross ticks
 
 	op.Do(cpu)
 
