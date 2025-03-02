@@ -5,7 +5,8 @@ const (
 	stackInit   = 0xfd
 )
 
-// The processor is little endian and expects addresses to be stored in memory least significant byte first.
+// The processor is little endian and expects
+// addresses to be stored in memory least significant byte first.
 type CPU struct {
 	PC uint16
 	SP uint8
@@ -47,18 +48,18 @@ func (cpu *CPU) Step() {
 	cpu.PC += op.Size
 }
 
-func (cpu *CPU) getOperand(am AddressMode) uint8 {
-	if am == amAcc {
+func (cpu *CPU) getOperand() uint8 {
+	if cpu.CurrentOp.AddressMode == amAcc {
 		return cpu.A
 	}
 
-	addr := cpu.getOperandAddress(am)
+	addr := cpu.getOperandAddress()
 
 	return cpu.Memory.Read(addr)
 }
 
-func (cpu *CPU) getOperandAddress(am AddressMode) uint16 {
-	switch am {
+func (cpu *CPU) getOperandAddress() uint16 {
+	switch cpu.CurrentOp.AddressMode {
 	case amImm:
 		return cpu.PC + 1
 	case amZeP:

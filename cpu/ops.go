@@ -43,7 +43,7 @@ func opcode2op(opcode uint8) *Operation {
 func nop(_ *CPU) {}
 
 func lda(cpu *CPU) {
-	val := cpu.getOperand(cpu.CurrentOp.AddressMode)
+	val := cpu.getOperand()
 
 	cpu.A = val
 	cpu.updateZeroFlag(val)
@@ -51,7 +51,7 @@ func lda(cpu *CPU) {
 }
 
 func ldx(cpu *CPU) {
-	val := cpu.getOperand(cpu.CurrentOp.AddressMode)
+	val := cpu.getOperand()
 
 	cpu.X = val
 	cpu.updateZeroFlag(val)
