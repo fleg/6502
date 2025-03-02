@@ -9,6 +9,7 @@ import (
 func TestLdaAbsoluteLoadsASetsNFlag(t *testing.T) {
 	cpu := New()
 	cpu.A = 0x00
+
 	// $0000 LDA $abcd
 	cpu.Memory.WriteSlice(0x0000, []byte{0xad, 0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x80)
@@ -16,8 +17,10 @@ func TestLdaAbsoluteLoadsASetsNFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaAbsoluteLoadsASetsZFlag(t *testing.T) {
@@ -31,8 +34,10 @@ func TestLdaAbsoluteLoadsASetsZFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaZPLoadsASetsNFlag(t *testing.T) {
@@ -46,8 +51,10 @@ func TestLdaZPLoadsASetsNFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaZPLoadsASetsZFlag(t *testing.T) {
@@ -61,8 +68,10 @@ func TestLdaZPLoadsASetsZFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaImmediateLoadsASetsNFlag(t *testing.T) {
@@ -75,8 +84,10 @@ func TestLdaImmediateLoadsASetsNFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaImmediateLoadsASetsZFlag(t *testing.T) {
@@ -89,8 +100,10 @@ func TestLdaImmediateLoadsASetsZFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaAbsXIndexedLoadsASetsNFlag(t *testing.T) {
@@ -98,15 +111,17 @@ func TestLdaAbsXIndexedLoadsASetsNFlag(t *testing.T) {
 	cpu.A = 0x00
 	cpu.X = 0x03
 
-	// $0000 LDA $ABCD,X
+	// $0000 LDA $abcd,X
 	cpu.Memory.WriteSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
-	cpu.Memory.Write(uint16(0xABCD)+uint16(cpu.X), 0x80)
+	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.X), 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x03), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaAbsXIndexedLoadsASetsZFlag(t *testing.T) {
@@ -114,29 +129,17 @@ func TestLdaAbsXIndexedLoadsASetsZFlag(t *testing.T) {
 	cpu.A = 0xFF
 	cpu.X = 0x03
 
-	// $0000 LDA $ABCD,X
+	// $0000 LDA $abcd,X
 	cpu.Memory.WriteSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.X), 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
-}
-
-func TestLdaAbsXIndexedDoesNotPageWrap(t *testing.T) {
-	cpu := New()
-	cpu.A = 0
-	cpu.X = 0xff
-
-	// $0000 LDA $0080,X
-	cpu.Memory.WriteSlice(0x0000, []byte{0xbd, 0x80, 0x00})
-	cpu.Memory.Write(uint16(0x0080)+uint16(cpu.X), 0x42)
-	cpu.Step()
-
-	assert.Equal(t, uint16(0x0003), cpu.PC)
-	assert.Equal(t, uint8(0x42), cpu.A)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x03), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaAbsYIndexedLoadsASetsNFlag(t *testing.T) {
@@ -151,8 +154,10 @@ func TestLdaAbsYIndexedLoadsASetsNFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x03), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaAbsYIndexedLoadsASetsZFlag(t *testing.T) {
@@ -167,22 +172,10 @@ func TestLdaAbsYIndexedLoadsASetsZFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
-}
-
-func TestLdaAbsYIndexedDoesNotPageWrap(t *testing.T) {
-	cpu := New()
-	cpu.A = 0
-	cpu.Y = 0xff
-
-	// $0000 LDA $0080,Y
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb9, 0x80, 0x00})
-	cpu.Memory.Write(uint16(0x0080)+uint16(cpu.Y), 0x42)
-	cpu.Step()
-
-	assert.Equal(t, uint16(0x0003), cpu.PC)
-	assert.Equal(t, uint8(0x42), cpu.A)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x03), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaIndIndexedXLoadsASetsNFlag(t *testing.T) {
@@ -191,7 +184,7 @@ func TestLdaIndIndexedXLoadsASetsNFlag(t *testing.T) {
 	cpu.X = 0x03
 
 	// $0000 LDA ($0010,X)
-	// $0013 Vector to $ABCD
+	// $0013 vector to $abcd
 	cpu.Memory.WriteSlice(0x0000, []byte{0xa1, 0x10})
 	cpu.Memory.WriteSlice(0x0013, []byte{0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x80)
@@ -199,8 +192,10 @@ func TestLdaIndIndexedXLoadsASetsNFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x03), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaIndIndexedXLoadsASetsZFlag(t *testing.T) {
@@ -209,7 +204,7 @@ func TestLdaIndIndexedXLoadsASetsZFlag(t *testing.T) {
 	cpu.X = 0x03
 
 	// $0000 LDA ($0010,X)
-	// $0013 Vector to $ABCD
+	// $0013 vector to $abcd
 	cpu.Memory.WriteSlice(0x0000, []byte{0xa1, 0x10})
 	cpu.Memory.WriteSlice(0x0013, []byte{0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x00)
@@ -217,8 +212,10 @@ func TestLdaIndIndexedXLoadsASetsZFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x03), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaIndexedIndYLoadsASetsNFlag(t *testing.T) {
@@ -227,7 +224,7 @@ func TestLdaIndexedIndYLoadsASetsNFlag(t *testing.T) {
 	cpu.Y = 0x03
 
 	// $0000 LDA ($0010),Y
-	// $0010 Vector to $ABCD
+	// $0010 Vector to $abcd
 	cpu.Memory.WriteSlice(0x0000, []byte{0xb1, 0x10})
 	cpu.Memory.WriteSlice(0x0010, []byte{0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x80)
@@ -235,8 +232,29 @@ func TestLdaIndexedIndYLoadsASetsNFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x03), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
+}
+
+func TestLdaIndexedIndYLoadsASetsNFlagWithCarry(t *testing.T) {
+	cpu := New()
+	cpu.A = 0x00
+	cpu.Y = 0xe9
+
+	// LDA ($a4),Y
+	cpu.Memory.WriteSlice(0x0000, []byte{0xb1, 0xa4})
+	cpu.Memory.WriteSlice(0x00a4, []byte{0x51, 0x3f})
+	cpu.Memory.Write(0x403a, 0xbb)
+	cpu.Step()
+
+	assert.Equal(t, uint16(0x0002), cpu.PC)
+	assert.Equal(t, uint8(0xbb), cpu.A)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0xe9), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
 func TestLdaIndexedIndYLoadsASetsZFlag(t *testing.T) {
@@ -245,7 +263,7 @@ func TestLdaIndexedIndYLoadsASetsZFlag(t *testing.T) {
 	cpu.Y = 0x03
 
 	// $0000 LDA ($0010),Y
-	// $0010 Vector to $ABCD
+	// $0010 Vector to $abcd
 	cpu.Memory.WriteSlice(0x0000, []byte{0xb1, 0x10})
 	cpu.Memory.WriteSlice(0x0010, []byte{0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x00)
@@ -253,11 +271,13 @@ func TestLdaIndexedIndYLoadsASetsZFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x00), cpu.X)
+	assert.Equal(t, uint8(0x03), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
-func TestLdaZPXIndexedLoadsASetsNFlag(t *testing.T) {
+func TestLdaZpXIndexedLoadsASetsNFlag(t *testing.T) {
 	cpu := New()
 	cpu.A = 0x00
 	cpu.X = 0x03
@@ -269,11 +289,13 @@ func TestLdaZPXIndexedLoadsASetsNFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x80), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagNegative)
-	assert.Equal(t, Flags(0), cpu.PS&flagZero)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0x03), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
-func TestLdaZPXIndexedLoadsASetsZFlag(t *testing.T) {
+func TestLdaZpXIndexedLoadsASetsZFlag(t *testing.T) {
 	cpu := New()
 	cpu.A = 0xff
 	cpu.X = 0x03
@@ -285,6 +307,26 @@ func TestLdaZPXIndexedLoadsASetsZFlag(t *testing.T) {
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
 	assert.Equal(t, uint8(0x00), cpu.A)
-	assert.Equal(t, cpu.PS, cpu.PS&flagZero)
-	assert.Equal(t, Flags(0), cpu.PS&flagNegative)
+	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, uint8(0x03), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
+}
+
+func TestLdaZpXIndexedWrapAroundZp(t *testing.T) {
+	cpu := New()
+	cpu.A = 0x00
+	cpu.X = 0xff
+
+	// $0000 LDA $40,X
+	cpu.Memory.WriteSlice(0x0000, []byte{0xb5, 0x40})
+	cpu.Memory.Write(uint16(0x003f), 0x42)
+	cpu.Step()
+
+	assert.Equal(t, uint16(0x0002), cpu.PC)
+	assert.Equal(t, uint8(0x42), cpu.A)
+	assert.Equal(t, flagEmpty, cpu.PS)
+	assert.Equal(t, uint8(0xff), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
 }

@@ -14,10 +14,9 @@ type CPU struct {
 	Y  uint8
 	PS Flags
 
-	Memory        Memory
-	TotalTicks    uint64
-	CurrentOp     *Operation
-	IsPageCrossed bool
+	Memory     Memory
+	TotalTicks uint64
+	CurrentOp  *Operation
 }
 
 func New() *CPU {
@@ -40,9 +39,7 @@ func (cpu *CPU) Step() {
 
 	cpu.TotalTicks += uint64(cpu.CurrentOp.Ticks)
 
-	if cpu.hasExtraTickOnPageCross() {
-		cpu.TotalTicks += 1
-	}
+	// TODO handle extra page cross ticks
 }
 
 func (cpu *CPU) nextOp() {
@@ -63,8 +60,6 @@ func (cpu *CPU) getOperand(am AddressMode) uint8 {
 
 	addr := cpu.getOperandAddress(am)
 
-	cpu.IsPageCrossed = addr&0x00ff == 0x00ff
-
 	return cpu.Memory.Read(addr)
 }
 
@@ -75,9 +70,11 @@ func (cpu *CPU) getOperandAddress(am AddressMode) uint16 {
 	case amZeP:
 		return uint16(cpu.Memory.Read(cpu.PC + 1))
 	case amZeX:
-		return uint16(cpu.Memory.Read(cpu.PC+1)+cpu.X) % 0x100
+		addr := cpu.Memory.Read(cpu.PC+1) + cpu.X
+		return uint16(addr)
 	case amZeY:
-		return uint16(cpu.Memory.Read(cpu.PC+1)+cpu.Y) % 0x100
+		addr := cpu.Memory.Read(cpu.PC+1) + cpu.Y
+		return uint16(addr)
 	case amRel:
 		return uint16(int32(cpu.PC) + 2 + int32(int8(cpu.Memory.Read(cpu.PC+1))))
 	case amAbs:
@@ -89,23 +86,17 @@ func (cpu *CPU) getOperandAddress(am AddressMode) uint16 {
 	case amInd:
 		return cpu.Memory.ReadWord(cpu.Memory.ReadWord(cpu.PC + 1))
 	case amInX:
-		return cpu.Memory.ReadWord((uint16(cpu.Memory.Read(cpu.PC+1)) + uint16(cpu.X)) % 0x100)
+		loAddr := cpu.Memory.Read(cpu.PC+1) + cpu.X
+		lo := cpu.Memory.Read(uint16(loAddr))
+		hi := cpu.Memory.Read(uint16(loAddr + 1))
+		return uint16(hi)<<8 | uint16(lo)
 	case amInY:
-		return cpu.Memory.ReadWord((uint16(cpu.Memory.Read(cpu.PC+1)))%0x100) + uint16(cpu.Y)
+		zp := uint16(cpu.Memory.Read(cpu.PC + 1))
+		lo := uint16(cpu.Memory.Read(zp)) + uint16(cpu.Y)
+		carry := lo >> 8
+		hi := uint16(cpu.Memory.Read(zp+1)) + carry
+		return uint16(hi)<<8 | uint16(lo&0x00ff)
 	default:
 		panic("Unknown address mode")
 	}
-}
-
-func (cpu *CPU) hasExtraTickOnPageCross() bool {
-	if !cpu.IsPageCrossed {
-		return false
-	}
-
-	switch cpu.CurrentOp.AddressMode {
-	case amAbX, amAbY, amInY:
-		return true
-	}
-
-	return false
 }

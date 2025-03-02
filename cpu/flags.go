@@ -3,6 +3,7 @@ package cpu
 type Flags uint8
 
 const (
+	flagEmpty     Flags = 0
 	flagCarry     Flags = 1 << 0
 	flagZero      Flags = 1 << 1
 	flagInterrupt Flags = 1 << 2

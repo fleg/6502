@@ -22,6 +22,12 @@ var ops = [256]*Operation{
 	0xb9: {"lda", amAbY, 3, 4, lda},
 	0xa1: {"lda", amInX, 2, 6, lda},
 	0xb1: {"lda", amInY, 2, 5, lda},
+
+	0xa2: {"ldx", amImm, 2, 2, ldx},
+	0xa6: {"ldx", amZeP, 2, 3, ldx},
+	0xb6: {"ldx", amZeY, 2, 4, ldx},
+	0xae: {"ldx", amAbs, 3, 4, ldx},
+	0xbe: {"ldx", amAbY, 3, 4, ldx},
 }
 
 func opcode2op(opcode uint8) *Operation {
@@ -40,6 +46,14 @@ func lda(cpu *CPU) {
 	val := cpu.getOperand(cpu.CurrentOp.AddressMode)
 
 	cpu.A = val
+	cpu.updateZeroFlag(val)
+	cpu.updateNegativeFlag(val)
+}
+
+func ldx(cpu *CPU) {
+	val := cpu.getOperand(cpu.CurrentOp.AddressMode)
+
+	cpu.X = val
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
