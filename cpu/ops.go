@@ -65,6 +65,9 @@ var ops = [256]*Operation{
 
 	0x4c: {"jmp", amAbs, 3, 3, jmp},
 	0x6c: {"jmp", amInd, 3, 5, jmp},
+
+	0x20: {"jsr", amAbs, 3, 6, jsr},
+	0x60: {"rts", amImp, 1, 6, rts},
 }
 
 func opcode2op(opcode uint8) *Operation {
@@ -187,4 +190,18 @@ func jmp(cpu *CPU) {
 	addr := cpu.fetchOpAddress()
 
 	cpu.PC = addr
+}
+
+func jsr(cpu *CPU) {
+	ret := cpu.PC + 1
+
+	cpu.PC = cpu.fetchOpAddress()
+	cpu.Memory.Write(stackBase|uint16(cpu.SP), uint8((ret&0xff00)>>8))
+	cpu.Memory.Write(stackBase|uint16(cpu.SP-1), uint8(ret&0x00ff))
+	cpu.SP -= 2
+}
+
+func rts(cpu *CPU) {
+	cpu.SP += 2
+	cpu.PC = 1 + cpu.readWord(stackBase|uint16(cpu.SP-1))
 }
