@@ -198,6 +198,26 @@ func TestLdaIndIndexedXLoadsASetsNFlag(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.SP)
 }
 
+func TestLdaIndIndexedXLoadsASetsNFlagIgnoreCarry(t *testing.T) {
+	cpu := New()
+	cpu.A = 0x00
+	cpu.X = 0xe9
+
+	// $0000 LDA ($0051,X)
+	// $003a vector to $3104
+	cpu.Memory.WriteSlice(0x0000, []byte{0xa1, 0x51})
+	cpu.Memory.WriteSlice(0x003a, []byte{0x04, 0x31})
+	cpu.Memory.Write(0x3104, 0x81)
+	cpu.Step()
+
+	assert.Equal(t, uint16(0x0002), cpu.PC)
+	assert.Equal(t, uint8(0x81), cpu.A)
+	assert.Equal(t, flagNegative, cpu.PS)
+	assert.Equal(t, uint8(0xe9), cpu.X)
+	assert.Equal(t, uint8(0x00), cpu.Y)
+	assert.Equal(t, uint8(0x00), cpu.SP)
+}
+
 func TestLdaIndIndexedXLoadsASetsZFlag(t *testing.T) {
 	cpu := New()
 	cpu.A = 0x00

@@ -3,6 +3,7 @@ package cpu
 const (
 	resetVector = 0xfffc
 	stackInit   = 0xfd
+	stackBase   = 0x0100
 )
 
 // The processor is little endian and expects
