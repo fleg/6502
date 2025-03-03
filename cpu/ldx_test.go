@@ -11,7 +11,7 @@ func TestLdxAbsoluteLoadsXSetsNFlag(t *testing.T) {
 	cpu.X = 0x00
 
 	// $0000 LDX $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xae, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xae, 0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x80)
 	cpu.Step()
 
@@ -28,7 +28,7 @@ func TestLdxAbsoluteLoadsXSetsZFlag(t *testing.T) {
 	cpu.X = 0xff
 
 	// $0000 LDX $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xae, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xae, 0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x00)
 	cpu.Step()
 

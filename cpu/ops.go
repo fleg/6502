@@ -62,6 +62,9 @@ var ops = [256]*Operation{
 	0x68: {"pla", amImp, 1, 3, pla},
 	0x08: {"php", amImp, 1, 3, php},
 	0x28: {"plp", amImp, 1, 3, plp},
+
+	0x4c: {"jmp", amAbs, 3, 3, jmp},
+	0x6c: {"jmp", amInd, 3, 5, jmp},
 }
 
 func opcode2op(opcode uint8) *Operation {
@@ -77,7 +80,7 @@ func opcode2op(opcode uint8) *Operation {
 func nop(_ *CPU) {}
 
 func lda(cpu *CPU) {
-	val := cpu.getOperand()
+	val := cpu.fetchOp()
 
 	cpu.A = val
 	cpu.updateZeroFlag(val)
@@ -85,7 +88,7 @@ func lda(cpu *CPU) {
 }
 
 func ldx(cpu *CPU) {
-	val := cpu.getOperand()
+	val := cpu.fetchOp()
 
 	cpu.X = val
 	cpu.updateZeroFlag(val)
@@ -93,7 +96,7 @@ func ldx(cpu *CPU) {
 }
 
 func ldy(cpu *CPU) {
-	val := cpu.getOperand()
+	val := cpu.fetchOp()
 
 	cpu.Y = val
 	cpu.updateZeroFlag(val)
@@ -101,19 +104,19 @@ func ldy(cpu *CPU) {
 }
 
 func sta(cpu *CPU) {
-	addr := cpu.getOperandAddress()
+	addr := cpu.fetchOpAddress()
 
 	cpu.Memory.Write(addr, cpu.A)
 }
 
 func stx(cpu *CPU) {
-	addr := cpu.getOperandAddress()
+	addr := cpu.fetchOpAddress()
 
 	cpu.Memory.Write(addr, cpu.X)
 }
 
 func sty(cpu *CPU) {
-	addr := cpu.getOperandAddress()
+	addr := cpu.fetchOpAddress()
 
 	cpu.Memory.Write(addr, cpu.Y)
 }
@@ -178,4 +181,10 @@ func php(cpu *CPU) {
 func plp(cpu *CPU) {
 	cpu.SP += 1
 	cpu.PS = Flags(cpu.Memory.Read(stackBase | uint16(cpu.SP)))
+}
+
+func jmp(cpu *CPU) {
+	addr := cpu.fetchOpAddress()
+
+	cpu.PC = addr
 }

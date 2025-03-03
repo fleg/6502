@@ -11,7 +11,7 @@ func TestLdyAbsoluteLoadsYSetsNFlag(t *testing.T) {
 	cpu.Y = 0x00
 
 	// $0000 LDY $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xac, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xac, 0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x80)
 	cpu.Step()
 
@@ -28,7 +28,7 @@ func TestLdyAbsoluteLoadsYSetsZFlag(t *testing.T) {
 	cpu.Y = 0xff
 
 	// $0000 LDY $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xac, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xac, 0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x00)
 	cpu.Step()
 

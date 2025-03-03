@@ -26,7 +26,7 @@ func New() *CPU {
 }
 
 func (cpu *CPU) Reset() {
-	cpu.PC = cpu.Memory.ReadWord(resetVector)
+	cpu.PC = cpu.readWord(resetVector)
 	cpu.SP = stackInit
 	cpu.A = 0
 	cpu.X = 0
@@ -36,8 +36,33 @@ func (cpu *CPU) Reset() {
 	cpu.setFlag(flagInterrupt, true)
 }
 
+func (cpu *CPU) nextPC() uint16 {
+	addr := cpu.PC
+	cpu.PC += 1
+
+	return addr
+}
+
+func (cpu *CPU) readPC() uint8 {
+	return cpu.Memory.Read(cpu.nextPC())
+}
+
+func (cpu *CPU) readPCWord() uint16 {
+	lo := cpu.readPC()
+	hi := cpu.readPC()
+
+	return word(lo, hi)
+}
+
+func (cpu *CPU) readWord(addr uint16) uint16 {
+	lo := cpu.Memory.Read(addr)
+	hi := cpu.Memory.Read(addr + 1)
+
+	return word(lo, hi)
+}
+
 func (cpu *CPU) Step() {
-	opcode := cpu.Memory.Read(cpu.PC)
+	opcode := cpu.readPC()
 	op := opcode2op(opcode)
 
 	cpu.CurrentOp = op
@@ -45,54 +70,55 @@ func (cpu *CPU) Step() {
 	// TODO handle extra page cross ticks
 
 	op.Do(cpu)
-
-	cpu.PC += op.Size
 }
 
-func (cpu *CPU) getOperand() uint8 {
+func (cpu *CPU) fetchOp() uint8 {
 	if cpu.CurrentOp.AddressMode == amAcc {
 		return cpu.A
 	}
 
-	addr := cpu.getOperandAddress()
+	addr := cpu.fetchOpAddress()
 
 	return cpu.Memory.Read(addr)
 }
 
-func (cpu *CPU) getOperandAddress() uint16 {
+func (cpu *CPU) fetchOpAddress() uint16 {
 	switch cpu.CurrentOp.AddressMode {
 	case amImm:
-		return cpu.PC + 1
+		return cpu.nextPC()
 	case amZeP:
-		return uint16(cpu.Memory.Read(cpu.PC + 1))
+		return uint16(cpu.readPC())
 	case amZeX:
-		addr := cpu.Memory.Read(cpu.PC+1) + cpu.X
+		addr := cpu.readPC() + cpu.X
 		return uint16(addr)
 	case amZeY:
-		addr := cpu.Memory.Read(cpu.PC+1) + cpu.Y
+		addr := cpu.readPC() + cpu.Y
 		return uint16(addr)
 	case amRel:
-		return uint16(int32(cpu.PC) + 2 + int32(int8(cpu.Memory.Read(cpu.PC+1))))
+		return uint16(int32(cpu.PC) + int32(int8(cpu.readPC())))
 	case amAbs:
-		return cpu.Memory.ReadWord(cpu.PC + 1)
+		return cpu.readPCWord()
 	case amAbX:
-		return cpu.Memory.ReadWord(cpu.PC+1) + uint16(cpu.X)
+		return cpu.readPCWord() + uint16(cpu.X)
 	case amAbY:
-		return cpu.Memory.ReadWord(cpu.PC+1) + uint16(cpu.Y)
+		return cpu.readPCWord() + uint16(cpu.Y)
 	case amInd:
-		return cpu.Memory.ReadWord(cpu.Memory.ReadWord(cpu.PC + 1))
+		return cpu.readWord(cpu.readPCWord())
 	case amInX:
-		loAddr := cpu.Memory.Read(cpu.PC+1) + cpu.X
-		lo := cpu.Memory.Read(uint16(loAddr))
-		hi := cpu.Memory.Read(uint16(loAddr + 1))
-		return uint16(hi)<<8 | uint16(lo)
+		addr := uint16(cpu.readPC() + cpu.X)
+		return cpu.readWord(addr)
 	case amInY:
-		zp := uint16(cpu.Memory.Read(cpu.PC + 1))
-		lo := uint16(cpu.Memory.Read(zp)) + uint16(cpu.Y)
-		carry := lo >> 8
-		hi := uint16(cpu.Memory.Read(zp+1)) + carry
-		return uint16(hi)<<8 | uint16(lo&0x00ff)
+		zp := uint16(cpu.readPC())
+		sum := uint16(cpu.Memory.Read(zp)) + uint16(cpu.Y)
+		carry := uint8(sum >> 8)
+		lo := uint8(sum & 0x00ff)
+		hi := cpu.Memory.Read(zp+1) + carry
+		return word(lo, hi)
 	default:
 		panic("Unknown address mode")
 	}
+}
+
+func word(lo uint8, hi uint8) uint16 {
+	return uint16(hi)<<8 | uint16(lo)
 }

@@ -11,7 +11,7 @@ func TestLdaAbsoluteLoadsASetsNFlag(t *testing.T) {
 	cpu.A = 0x00
 
 	// $0000 LDA $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xad, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xad, 0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x80)
 	cpu.Step()
 
@@ -28,7 +28,7 @@ func TestLdaAbsoluteLoadsASetsZFlag(t *testing.T) {
 	cpu.A = 0xff
 
 	// $0000 LDA $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xad, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xad, 0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x00)
 	cpu.Step()
 
@@ -45,7 +45,7 @@ func TestLdaZPLoadsASetsNFlag(t *testing.T) {
 	cpu.A = 0x00
 
 	// $0000 LDA $0010
-	cpu.Memory.WriteSlice(0x0000, []byte{0xa5, 0x10})
+	cpu.Memory.writeSlice(0x0000, []byte{0xa5, 0x10})
 	cpu.Memory.Write(0x0010, 0x80)
 	cpu.Step()
 
@@ -62,7 +62,7 @@ func TestLdaZPLoadsASetsZFlag(t *testing.T) {
 	cpu.A = 0xFF
 
 	// $0000 LDA $0010
-	cpu.Memory.WriteSlice(0x0000, []byte{0xa5, 0x10})
+	cpu.Memory.writeSlice(0x0000, []byte{0xa5, 0x10})
 	cpu.Memory.Write(0x0010, 0x00)
 	cpu.Step()
 
@@ -79,7 +79,7 @@ func TestLdaImmediateLoadsASetsNFlag(t *testing.T) {
 	cpu.A = 0x00
 
 	// $0000 LDA #$80
-	cpu.Memory.WriteSlice(0x0000, []byte{0xa9, 0x80})
+	cpu.Memory.writeSlice(0x0000, []byte{0xa9, 0x80})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -95,7 +95,7 @@ func TestLdaImmediateLoadsASetsZFlag(t *testing.T) {
 	cpu.A = 0xFF
 
 	// $0000 LDA #$00
-	cpu.Memory.WriteSlice(0x0000, []byte{0xA9, 0x00})
+	cpu.Memory.writeSlice(0x0000, []byte{0xA9, 0x00})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -112,7 +112,7 @@ func TestLdaAbsXIndexedLoadsASetsNFlag(t *testing.T) {
 	cpu.X = 0x03
 
 	// $0000 LDA $abcd,X
-	cpu.Memory.WriteSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.X), 0x80)
 	cpu.Step()
 
@@ -130,7 +130,7 @@ func TestLdaAbsXIndexedLoadsASetsZFlag(t *testing.T) {
 	cpu.X = 0x03
 
 	// $0000 LDA $abcd,X
-	cpu.Memory.WriteSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.X), 0x00)
 	cpu.Step()
 
@@ -148,7 +148,7 @@ func TestLdaAbsYIndexedLoadsASetsNFlag(t *testing.T) {
 	cpu.Y = 0x03
 
 	// $0000 LDA $abcd,Y
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb9, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb9, 0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x80)
 	cpu.Step()
 
@@ -166,7 +166,7 @@ func TestLdaAbsYIndexedLoadsASetsZFlag(t *testing.T) {
 	cpu.Y = 0x03
 
 	// $0000 LDA $abcd,Y
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb9, 0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb9, 0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x00)
 	cpu.Step()
 
@@ -185,8 +185,8 @@ func TestLdaIndIndexedXLoadsASetsNFlag(t *testing.T) {
 
 	// $0000 LDA ($0010,X)
 	// $0013 vector to $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xa1, 0x10})
-	cpu.Memory.WriteSlice(0x0013, []byte{0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xa1, 0x10})
+	cpu.Memory.writeSlice(0x0013, []byte{0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x80)
 	cpu.Step()
 
@@ -205,8 +205,8 @@ func TestLdaIndIndexedXLoadsASetsNFlagIgnoreCarry(t *testing.T) {
 
 	// $0000 LDA ($0051,X)
 	// $003a vector to $3104
-	cpu.Memory.WriteSlice(0x0000, []byte{0xa1, 0x51})
-	cpu.Memory.WriteSlice(0x003a, []byte{0x04, 0x31})
+	cpu.Memory.writeSlice(0x0000, []byte{0xa1, 0x51})
+	cpu.Memory.writeSlice(0x003a, []byte{0x04, 0x31})
 	cpu.Memory.Write(0x3104, 0x81)
 	cpu.Step()
 
@@ -225,8 +225,8 @@ func TestLdaIndIndexedXLoadsASetsZFlag(t *testing.T) {
 
 	// $0000 LDA ($0010,X)
 	// $0013 vector to $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xa1, 0x10})
-	cpu.Memory.WriteSlice(0x0013, []byte{0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xa1, 0x10})
+	cpu.Memory.writeSlice(0x0013, []byte{0xcd, 0xab})
 	cpu.Memory.Write(0xabcd, 0x00)
 	cpu.Step()
 
@@ -245,8 +245,8 @@ func TestLdaIndexedIndYLoadsASetsNFlag(t *testing.T) {
 
 	// $0000 LDA ($0010),Y
 	// $0010 Vector to $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb1, 0x10})
-	cpu.Memory.WriteSlice(0x0010, []byte{0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb1, 0x10})
+	cpu.Memory.writeSlice(0x0010, []byte{0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x80)
 	cpu.Step()
 
@@ -264,8 +264,8 @@ func TestLdaIndexedIndYLoadsASetsNFlagWithCarry(t *testing.T) {
 	cpu.Y = 0xe9
 
 	// LDA ($a4),Y
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb1, 0xa4})
-	cpu.Memory.WriteSlice(0x00a4, []byte{0x51, 0x3f})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb1, 0xa4})
+	cpu.Memory.writeSlice(0x00a4, []byte{0x51, 0x3f})
 	cpu.Memory.Write(0x403a, 0xbb)
 	cpu.Step()
 
@@ -284,8 +284,8 @@ func TestLdaIndexedIndYLoadsASetsZFlag(t *testing.T) {
 
 	// $0000 LDA ($0010),Y
 	// $0010 Vector to $abcd
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb1, 0x10})
-	cpu.Memory.WriteSlice(0x0010, []byte{0xcd, 0xab})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb1, 0x10})
+	cpu.Memory.writeSlice(0x0010, []byte{0xcd, 0xab})
 	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x00)
 	cpu.Step()
 
@@ -303,7 +303,7 @@ func TestLdaZpXIndexedLoadsASetsNFlag(t *testing.T) {
 	cpu.X = 0x03
 
 	// $0000 LDA $10,X
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb5, 0x10})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb5, 0x10})
 	cpu.Memory.Write(uint16(0x0010)+uint16(cpu.X), 0x80)
 	cpu.Step()
 
@@ -321,7 +321,7 @@ func TestLdaZpXIndexedLoadsASetsZFlag(t *testing.T) {
 	cpu.X = 0x03
 
 	// $0000 LDA $10,X
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb5, 0x10})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb5, 0x10})
 	cpu.Memory.Write(uint16(0x0010)+uint16(cpu.X), 0x00)
 	cpu.Step()
 
@@ -339,7 +339,7 @@ func TestLdaZpXIndexedWrapAroundZp(t *testing.T) {
 	cpu.X = 0xff
 
 	// $0000 LDA $40,X
-	cpu.Memory.WriteSlice(0x0000, []byte{0xb5, 0x40})
+	cpu.Memory.writeSlice(0x0000, []byte{0xb5, 0x40})
 	cpu.Memory.Write(uint16(0x003f), 0x42)
 	cpu.Step()
 
