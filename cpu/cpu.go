@@ -18,7 +18,7 @@ type CPU struct {
 
 	Memory     Memory
 	TotalTicks uint64
-	CurrentOp  *Operation
+	CurrentOp  *Op
 }
 
 func New() *CPU {
