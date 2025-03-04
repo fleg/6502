@@ -92,26 +92,22 @@ func tya(cpu *CPU) {
 }
 
 func pha(cpu *CPU) {
-	cpu.Memory.Write(stackBase|uint16(cpu.SP), cpu.A)
-	cpu.SP -= 1
+	cpu.push(cpu.A)
 }
 
 func pla(cpu *CPU) {
-	cpu.SP += 1
-	cpu.A = cpu.Memory.Read(stackBase | uint16(cpu.SP))
+	cpu.A = cpu.pop()
 
 	cpu.updateZeroFlag(cpu.A)
 	cpu.updateNegativeFlag(cpu.A)
 }
 
 func php(cpu *CPU) {
-	cpu.Memory.Write(stackBase|uint16(cpu.SP), uint8(cpu.PS))
-	cpu.SP -= 1
+	cpu.push(uint8(cpu.PS))
 }
 
 func plp(cpu *CPU) {
-	cpu.SP += 1
-	cpu.PS = Flags(cpu.Memory.Read(stackBase | uint16(cpu.SP)))
+	cpu.PS = Flags(cpu.pop())
 }
 
 func jmp(cpu *CPU) {
@@ -124,14 +120,11 @@ func jsr(cpu *CPU) {
 	ret := cpu.PC + 1
 
 	cpu.PC = cpu.fetchOpAddress()
-	cpu.Memory.Write(stackBase|uint16(cpu.SP), uint8((ret&0xff00)>>8))
-	cpu.Memory.Write(stackBase|uint16(cpu.SP-1), uint8(ret&0x00ff))
-	cpu.SP -= 2
+	cpu.pushWord(ret)
 }
 
 func rts(cpu *CPU) {
-	cpu.SP += 2
-	cpu.PC = 1 + cpu.readWord(stackBase|uint16(cpu.SP-1))
+	cpu.PC = 1 + cpu.popWord()
 }
 
 func branch(cpu *CPU, flag Flags, isSet bool) {
