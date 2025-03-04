@@ -68,6 +68,15 @@ var ops = [256]*Operation{
 
 	0x20: {"jsr", amAbs, 3, 6, jsr},
 	0x60: {"rts", amImp, 1, 6, rts},
+
+	0xb0: {"bcs", amRel, 2, 2, bcs},
+	0x90: {"bcc", amRel, 2, 2, bcc},
+	0xf0: {"beq", amRel, 2, 2, beq},
+	0xd0: {"bne", amRel, 2, 2, bne},
+	0x30: {"bmi", amRel, 2, 2, bmi},
+	0x10: {"bpl", amRel, 2, 2, bpl},
+	0x70: {"bvs", amRel, 2, 2, bvs},
+	0x50: {"bvc", amRel, 2, 2, bvc},
 }
 
 func opcode2op(opcode uint8) *Operation {
@@ -204,4 +213,44 @@ func jsr(cpu *CPU) {
 func rts(cpu *CPU) {
 	cpu.SP += 2
 	cpu.PC = 1 + cpu.readWord(stackBase|uint16(cpu.SP-1))
+}
+
+func branch(cpu *CPU, flag Flags, isSet bool) {
+	addr := cpu.fetchOpAddress()
+
+	if isSet == cpu.getFlag(flag) {
+		cpu.PC = addr
+	}
+}
+
+func bcs(cpu *CPU) {
+	branch(cpu, flagCarry, true)
+}
+
+func bcc(cpu *CPU) {
+	branch(cpu, flagCarry, false)
+}
+
+func beq(cpu *CPU) {
+	branch(cpu, flagZero, true)
+}
+
+func bne(cpu *CPU) {
+	branch(cpu, flagZero, false)
+}
+
+func bmi(cpu *CPU) {
+	branch(cpu, flagNegative, true)
+}
+
+func bpl(cpu *CPU) {
+	branch(cpu, flagNegative, false)
+}
+
+func bvs(cpu *CPU) {
+	branch(cpu, flagOverflow, true)
+}
+
+func bvc(cpu *CPU) {
+	branch(cpu, flagOverflow, false)
 }

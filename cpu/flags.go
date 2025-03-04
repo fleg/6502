@@ -22,7 +22,7 @@ func (cpu *CPU) setFlag(mask Flags, value bool) {
 }
 
 func (cpu *CPU) getFlag(mask Flags) bool {
-	return cpu.PS&mask == 1
+	return cpu.PS&mask >= 1
 }
 
 func (cpu *CPU) updateZeroFlag(val uint8) {

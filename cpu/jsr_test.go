@@ -11,7 +11,7 @@ func TestJsrPushesAndUpdatePC(t *testing.T) {
 	cpu.PC = 0xc010
 	cpu.SP = 0xfd
 
-	// $c010 JMP $ffd2
+	// $c010 JSR $ffd2
 	cpu.Memory.writeSlice(0xc010, []byte{0x20, 0xd2, 0xff})
 	cpu.Step()
 

@@ -95,7 +95,8 @@ func (cpu *CPU) fetchOpAddress() uint16 {
 		addr := cpu.readPC() + cpu.Y
 		return uint16(addr)
 	case amRel:
-		return uint16(int32(cpu.PC) + int32(int8(cpu.readPC())))
+		offset := int8(cpu.readPC())
+		return uint16(int32(cpu.PC) + int32(offset))
 	case amAbs:
 		return cpu.readPCWord()
 	case amAbX:
