@@ -80,6 +80,11 @@ var ops = [256]*Op{
 	0x38: {"sec", amImp, 1, 2, sec},
 	0xf8: {"sed", amImp, 1, 2, sed},
 	0x78: {"sei", amImp, 1, 2, sei},
+
+	0xc6: {"dec", amZeP, 2, 5, dec},
+	0xd6: {"dec", amZeX, 2, 6, dec},
+	0xce: {"dec", amAbs, 2, 6, dec},
+	0xde: {"dec", amAbX, 2, 7, dec},
 }
 
 func opcode2op(opcode uint8) *Op {

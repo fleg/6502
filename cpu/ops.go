@@ -213,3 +213,12 @@ func sed(cpu *CPU) {
 func sei(cpu *CPU) {
 	cpu.setFlag(flagInterrupt, true)
 }
+
+func dec(cpu *CPU) {
+	addr := cpu.fetchOpAddress()
+	val := cpu.Memory.Read(addr) - 1
+	cpu.Memory.Write(addr, val)
+
+	cpu.updateZeroFlag(val)
+	cpu.updateNegativeFlag(val)
+}
