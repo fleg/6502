@@ -236,3 +236,12 @@ func dey(cpu *CPU) {
 	cpu.updateZeroFlag(cpu.Y)
 	cpu.updateNegativeFlag(cpu.Y)
 }
+
+func inc(cpu *CPU) {
+	addr := cpu.fetchOpAddress()
+	val := cpu.Memory.Read(addr) + 1
+	cpu.Memory.Write(addr, val)
+
+	cpu.updateZeroFlag(val)
+	cpu.updateNegativeFlag(val)
+}
