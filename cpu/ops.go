@@ -185,3 +185,31 @@ func bvs(cpu *CPU) {
 func bvc(cpu *CPU) {
 	branch(cpu, flagOverflow, false)
 }
+
+func clc(cpu *CPU) {
+	cpu.setFlag(flagCarry, false)
+}
+
+func cld(cpu *CPU) {
+	cpu.setFlag(flagDecimal, false)
+}
+
+func cli(cpu *CPU) {
+	cpu.setFlag(flagInterrupt, false)
+}
+
+func clv(cpu *CPU) {
+	cpu.setFlag(flagOverflow, false)
+}
+
+func sec(cpu *CPU) {
+	cpu.setFlag(flagCarry, true)
+}
+
+func sed(cpu *CPU) {
+	cpu.setFlag(flagDecimal, true)
+}
+
+func sei(cpu *CPU) {
+	cpu.setFlag(flagInterrupt, true)
+}
