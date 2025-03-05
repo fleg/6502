@@ -2,6 +2,7 @@ package cpu
 
 const (
 	resetVector = 0xfffc
+	irqVector   = 0xfffe
 	stackInit   = 0xfd
 	stackBase   = 0x0100
 )

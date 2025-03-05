@@ -127,6 +127,25 @@ func rts(cpu *CPU) {
 	cpu.PC = 1 + cpu.popWord()
 }
 
+func brk(cpu *CPU) {
+	// note: if an IRQ happens at the same time as a BRK instruction,
+	// the BRK instruction is ignored
+
+	cpu.nextPC()
+	cpu.pushWord(cpu.PC)
+	cpu.push(uint8(cpu.PS | flagBreak | flagUnused))
+	cpu.setFlag(flagInterrupt, true)
+	cpu.PC = cpu.readWord(irqVector)
+}
+
+func rti(cpu *CPU) {
+	cpu.PS = Flags(cpu.pop())
+	cpu.PC = cpu.popWord()
+
+	cpu.setFlag(flagUnused, true)
+	cpu.setFlag(flagBreak, false)
+}
+
 func branch(cpu *CPU, flag Flags, isSet bool) {
 	addr := cpu.fetchOpAddress()
 

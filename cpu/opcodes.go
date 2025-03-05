@@ -61,6 +61,9 @@ var ops = [256]*Op{
 	0x20: {"jsr", amAbs, 3, 6, jsr},
 	0x60: {"rts", amImp, 1, 6, rts},
 
+	0x00: {"brk", amImp, 1, 7, brk},
+	0x40: {"rti", amImp, 1, 6, rti},
+
 	0xb0: {"bcs", amRel, 2, 2, bcs},
 	0x90: {"bcc", amRel, 2, 2, bcc},
 	0xf0: {"beq", amRel, 2, 2, beq},
