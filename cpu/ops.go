@@ -245,3 +245,17 @@ func inc(cpu *CPU) {
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
+
+func inx(cpu *CPU) {
+	cpu.X += 1
+
+	cpu.updateZeroFlag(cpu.X)
+	cpu.updateNegativeFlag(cpu.X)
+}
+
+func iny(cpu *CPU) {
+	cpu.Y += 1
+
+	cpu.updateZeroFlag(cpu.Y)
+	cpu.updateNegativeFlag(cpu.Y)
+}

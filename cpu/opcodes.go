@@ -94,6 +94,9 @@ var ops = [256]*Op{
 	0xf6: {"inc", amZeX, 2, 6, inc},
 	0xee: {"inc", amAbs, 2, 6, inc},
 	0xfe: {"inc", amAbX, 2, 5, inc},
+
+	0xe8: {"inx", amImp, 1, 2, inx},
+	0xc8: {"iny", amImp, 1, 2, iny},
 }
 
 func opcode2op(opcode uint8) *Op {
