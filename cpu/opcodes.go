@@ -77,6 +77,7 @@ var ops = [256]*Op{
 	0xd8: {"cld", amImp, 1, 2, cld},
 	0x58: {"cli", amImp, 1, 2, cli},
 	0xb8: {"clv", amImp, 1, 2, clv},
+
 	0x38: {"sec", amImp, 1, 2, sec},
 	0xf8: {"sed", amImp, 1, 2, sed},
 	0x78: {"sei", amImp, 1, 2, sei},
@@ -85,6 +86,9 @@ var ops = [256]*Op{
 	0xd6: {"dec", amZeX, 2, 6, dec},
 	0xce: {"dec", amAbs, 2, 6, dec},
 	0xde: {"dec", amAbX, 2, 7, dec},
+
+	0xca: {"dex", amImp, 1, 2, dex},
+	0x88: {"dey", amImp, 1, 2, dey},
 }
 
 func opcode2op(opcode uint8) *Op {
