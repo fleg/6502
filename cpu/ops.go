@@ -274,3 +274,25 @@ func lsr(cpu *CPU, operand *Operand) {
 	cpu.updateZeroFlag(val)
 	cpu.setFlag(flagNegative, false)
 }
+
+func rol(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+	carry := val&0x80 > 0
+	val = val<<1 | uint8(cpu.PS&flagCarry)
+
+	cpu.writeOperand(operand, val)
+	cpu.setFlag(flagCarry, carry)
+	cpu.updateZeroFlag(val)
+	cpu.updateNegativeFlag(val)
+}
+
+func ror(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+	carry := val&0x01 > 0
+	val = uint8(cpu.PS&flagCarry)<<7 | val>>1
+
+	cpu.writeOperand(operand, val)
+	cpu.setFlag(flagCarry, carry)
+	cpu.updateZeroFlag(val)
+	cpu.updateNegativeFlag(val)
+}
