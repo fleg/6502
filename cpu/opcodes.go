@@ -4,7 +4,7 @@ import "fmt"
 
 var ops = [256]*Op{
 	// opcode: name addrmode size ticks do
-	0xea: {"nop", amImm, 1, 2, nop},
+	0xea: {"nop", amImp, 1, 2, nop},
 
 	0xa9: {"lda", amImm, 2, 2, lda},
 	0xa5: {"lda", amZeP, 2, 3, lda},

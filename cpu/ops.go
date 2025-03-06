@@ -5,129 +5,126 @@ type Op struct {
 	AddressMode AddressMode
 	Size        uint16
 	Ticks       uint8
-	Do          func(*CPU)
+	Do          func(*CPU, *Operand)
 }
 
-func nop(_ *CPU) {}
+type Operand struct {
+	Address     uint16
+	AddressMode AddressMode
+}
 
-func lda(cpu *CPU) {
-	val := cpu.fetchOp()
+func nop(_ *CPU, _ *Operand) {}
+
+func lda(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
 
 	cpu.A = val
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
 
-func ldx(cpu *CPU) {
-	val := cpu.fetchOp()
+func ldx(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
 
 	cpu.X = val
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
 
-func ldy(cpu *CPU) {
-	val := cpu.fetchOp()
+func ldy(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
 
 	cpu.Y = val
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
 
-func sta(cpu *CPU) {
-	addr := cpu.fetchOpAddress()
-
-	cpu.Memory.Write(addr, cpu.A)
+func sta(cpu *CPU, operand *Operand) {
+	cpu.writeOperand(operand, cpu.A)
 }
 
-func stx(cpu *CPU) {
-	addr := cpu.fetchOpAddress()
-
-	cpu.Memory.Write(addr, cpu.X)
+func stx(cpu *CPU, operand *Operand) {
+	cpu.writeOperand(operand, cpu.X)
 }
 
-func sty(cpu *CPU) {
-	addr := cpu.fetchOpAddress()
-
-	cpu.Memory.Write(addr, cpu.Y)
+func sty(cpu *CPU, operand *Operand) {
+	cpu.writeOperand(operand, cpu.Y)
 }
 
-func tax(cpu *CPU) {
+func tax(cpu *CPU, _ *Operand) {
 	cpu.X = cpu.A
 
 	cpu.updateZeroFlag(cpu.X)
 	cpu.updateNegativeFlag(cpu.X)
 }
 
-func tay(cpu *CPU) {
+func tay(cpu *CPU, _ *Operand) {
 	cpu.Y = cpu.A
 
 	cpu.updateZeroFlag(cpu.Y)
 	cpu.updateNegativeFlag(cpu.Y)
 }
 
-func tsx(cpu *CPU) {
+func tsx(cpu *CPU, _ *Operand) {
 	cpu.X = cpu.SP
 
 	cpu.updateZeroFlag(cpu.X)
 	cpu.updateNegativeFlag(cpu.X)
 }
 
-func txa(cpu *CPU) {
+func txa(cpu *CPU, _ *Operand) {
 	cpu.A = cpu.X
 
 	cpu.updateZeroFlag(cpu.A)
 	cpu.updateNegativeFlag(cpu.A)
 }
 
-func txs(cpu *CPU) {
+func txs(cpu *CPU, _ *Operand) {
 	cpu.SP = cpu.X
 }
 
-func tya(cpu *CPU) {
+func tya(cpu *CPU, _ *Operand) {
 	cpu.A = cpu.X
 
 	cpu.updateZeroFlag(cpu.A)
 	cpu.updateNegativeFlag(cpu.A)
 }
 
-func pha(cpu *CPU) {
+func pha(cpu *CPU, _ *Operand) {
 	cpu.push(cpu.A)
 }
 
-func pla(cpu *CPU) {
+func pla(cpu *CPU, _ *Operand) {
 	cpu.A = cpu.pop()
 
 	cpu.updateZeroFlag(cpu.A)
 	cpu.updateNegativeFlag(cpu.A)
 }
 
-func php(cpu *CPU) {
+func php(cpu *CPU, _ *Operand) {
 	cpu.push(uint8(cpu.PS))
 }
 
-func plp(cpu *CPU) {
+func plp(cpu *CPU, _ *Operand) {
 	cpu.PS = Flags(cpu.pop())
 }
 
-func jmp(cpu *CPU) {
-	addr := cpu.fetchOpAddress()
-
-	cpu.PC = addr
+func jmp(cpu *CPU, operand *Operand) {
+	cpu.PC = operand.Address
 }
 
-func jsr(cpu *CPU) {
-	ret := cpu.PC + 1
+func jsr(cpu *CPU, operand *Operand) {
+	ret := cpu.PC - 1
 
-	cpu.PC = cpu.fetchOpAddress()
+	cpu.PC = operand.Address
 	cpu.pushWord(ret)
 }
 
-func rts(cpu *CPU) {
+func rts(cpu *CPU, _ *Operand) {
 	cpu.PC = 1 + cpu.popWord()
 }
 
-func brk(cpu *CPU) {
+func brk(cpu *CPU, _ *Operand) {
 	// note: if an IRQ happens at the same time as a BRK instruction,
 	// the BRK instruction is ignored
 
@@ -138,7 +135,7 @@ func brk(cpu *CPU) {
 	cpu.PC = cpu.readWord(irqVector)
 }
 
-func rti(cpu *CPU) {
+func rti(cpu *CPU, _ *Operand) {
 	cpu.PS = Flags(cpu.pop())
 	cpu.PC = cpu.popWord()
 
@@ -146,114 +143,110 @@ func rti(cpu *CPU) {
 	cpu.setFlag(flagBreak, false)
 }
 
-func branch(cpu *CPU, flag Flags, isSet bool) {
-	addr := cpu.fetchOpAddress()
-
+func branch(cpu *CPU, operand *Operand, flag Flags, isSet bool) {
 	if isSet == cpu.getFlag(flag) {
-		cpu.PC = addr
+		cpu.PC = operand.Address
 	}
 }
 
-func bcs(cpu *CPU) {
-	branch(cpu, flagCarry, true)
+func bcs(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagCarry, true)
 }
 
-func bcc(cpu *CPU) {
-	branch(cpu, flagCarry, false)
+func bcc(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagCarry, false)
 }
 
-func beq(cpu *CPU) {
-	branch(cpu, flagZero, true)
+func beq(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagZero, true)
 }
 
-func bne(cpu *CPU) {
-	branch(cpu, flagZero, false)
+func bne(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagZero, false)
 }
 
-func bmi(cpu *CPU) {
-	branch(cpu, flagNegative, true)
+func bmi(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagNegative, true)
 }
 
-func bpl(cpu *CPU) {
-	branch(cpu, flagNegative, false)
+func bpl(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagNegative, false)
 }
 
-func bvs(cpu *CPU) {
-	branch(cpu, flagOverflow, true)
+func bvs(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagOverflow, true)
 }
 
-func bvc(cpu *CPU) {
-	branch(cpu, flagOverflow, false)
+func bvc(cpu *CPU, operand *Operand) {
+	branch(cpu, operand, flagOverflow, false)
 }
 
-func clc(cpu *CPU) {
+func clc(cpu *CPU, _ *Operand) {
 	cpu.setFlag(flagCarry, false)
 }
 
-func cld(cpu *CPU) {
+func cld(cpu *CPU, _ *Operand) {
 	cpu.setFlag(flagDecimal, false)
 }
 
-func cli(cpu *CPU) {
+func cli(cpu *CPU, _ *Operand) {
 	cpu.setFlag(flagInterrupt, false)
 }
 
-func clv(cpu *CPU) {
+func clv(cpu *CPU, _ *Operand) {
 	cpu.setFlag(flagOverflow, false)
 }
 
-func sec(cpu *CPU) {
+func sec(cpu *CPU, _ *Operand) {
 	cpu.setFlag(flagCarry, true)
 }
 
-func sed(cpu *CPU) {
+func sed(cpu *CPU, _ *Operand) {
 	cpu.setFlag(flagDecimal, true)
 }
 
-func sei(cpu *CPU) {
+func sei(cpu *CPU, _ *Operand) {
 	cpu.setFlag(flagInterrupt, true)
 }
 
-func dec(cpu *CPU) {
-	addr := cpu.fetchOpAddress()
-	val := cpu.Memory.Read(addr) - 1
-	cpu.Memory.Write(addr, val)
+func dec(cpu *CPU, operand *Operand) {
+	val := cpu.Memory.Read(operand.Address) - 1
+	cpu.writeOperand(operand, val)
 
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
 
-func dex(cpu *CPU) {
+func dex(cpu *CPU, _ *Operand) {
 	cpu.X -= 1
 
 	cpu.updateZeroFlag(cpu.X)
 	cpu.updateNegativeFlag(cpu.X)
 }
 
-func dey(cpu *CPU) {
+func dey(cpu *CPU, _ *Operand) {
 	cpu.Y -= 1
 
 	cpu.updateZeroFlag(cpu.Y)
 	cpu.updateNegativeFlag(cpu.Y)
 }
 
-func inc(cpu *CPU) {
-	addr := cpu.fetchOpAddress()
-	val := cpu.Memory.Read(addr) + 1
-	cpu.Memory.Write(addr, val)
+func inc(cpu *CPU, operand *Operand) {
+	val := cpu.Memory.Read(operand.Address) + 1
+	cpu.writeOperand(operand, val)
 
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
 
-func inx(cpu *CPU) {
+func inx(cpu *CPU, _ *Operand) {
 	cpu.X += 1
 
 	cpu.updateZeroFlag(cpu.X)
 	cpu.updateNegativeFlag(cpu.X)
 }
 
-func iny(cpu *CPU) {
+func iny(cpu *CPU, _ *Operand) {
 	cpu.Y += 1
 
 	cpu.updateZeroFlag(cpu.Y)

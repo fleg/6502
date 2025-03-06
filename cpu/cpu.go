@@ -19,7 +19,6 @@ type CPU struct {
 
 	Memory     Memory
 	TotalTicks uint64
-	CurrentOp  *Op
 }
 
 func New() *CPU {
@@ -66,25 +65,29 @@ func (cpu *CPU) Step() {
 	opcode := cpu.readPC()
 	op := opcode2op(opcode)
 
-	cpu.CurrentOp = op
-	cpu.TotalTicks += uint64(cpu.CurrentOp.Ticks)
+	operand := cpu.fetchOperand(op.AddressMode)
+	op.Do(cpu, operand)
+
+	cpu.TotalTicks += uint64(op.Ticks)
 	// TODO handle extra page cross ticks
-
-	op.Do(cpu)
 }
 
-func (cpu *CPU) fetchOp() uint8 {
-	if cpu.CurrentOp.AddressMode == amAcc {
-		return cpu.A
+func (cpu *CPU) fetchOperand(am AddressMode) *Operand {
+	switch am {
+	case amImp, amAcc:
+		return &Operand{AddressMode: am}
+	default:
+		return &Operand{
+			Address:     cpu.fetchOperandAddress(am),
+			AddressMode: am,
+		}
 	}
-
-	addr := cpu.fetchOpAddress()
-
-	return cpu.Memory.Read(addr)
 }
 
-func (cpu *CPU) fetchOpAddress() uint16 {
-	switch cpu.CurrentOp.AddressMode {
+func (cpu *CPU) fetchOperandAddress(am AddressMode) uint16 {
+	switch am {
+	case amImp, amAcc:
+		return 0
 	case amImm:
 		return cpu.nextPC()
 	case amZeP:
@@ -118,6 +121,22 @@ func (cpu *CPU) fetchOpAddress() uint16 {
 		return word(lo, hi)
 	default:
 		panic("Unknown address mode")
+	}
+}
+
+func (cpu *CPU) readOperand(operand *Operand) uint8 {
+	if operand.AddressMode == amAcc {
+		return cpu.A
+	}
+
+	return cpu.Memory.Read(operand.Address)
+}
+
+func (cpu *CPU) writeOperand(operand *Operand, val uint8) {
+	if operand.AddressMode == amAcc {
+		cpu.A = val
+	} else {
+		cpu.Memory.Write(operand.Address, val)
 	}
 }
 
