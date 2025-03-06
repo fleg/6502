@@ -97,6 +97,18 @@ var ops = [256]*Op{
 
 	0xe8: {"inx", amImp, 1, 2, inx},
 	0xc8: {"iny", amImp, 1, 2, iny},
+
+	0x0a: {"asl", amAcc, 1, 2, asl},
+	0x06: {"asl", amZeP, 2, 5, asl},
+	0x16: {"asl", amZeX, 2, 6, asl},
+	0x0e: {"asl", amAbs, 3, 6, asl},
+	0x1e: {"asl", amAbX, 3, 7, asl},
+
+	0x4a: {"lsr", amAcc, 1, 2, lsr},
+	0x46: {"lsr", amZeP, 2, 5, lsr},
+	0x56: {"lsr", amZeX, 2, 6, lsr},
+	0x4e: {"lsr", amAbs, 3, 6, lsr},
+	0x5e: {"lsr", amAbX, 3, 7, lsr},
 }
 
 func opcode2op(opcode uint8) *Op {

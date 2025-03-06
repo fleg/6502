@@ -252,3 +252,25 @@ func iny(cpu *CPU, _ *Operand) {
 	cpu.updateZeroFlag(cpu.Y)
 	cpu.updateNegativeFlag(cpu.Y)
 }
+
+func asl(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+	carry := val&0x80 > 0
+	val = val << 1
+
+	cpu.writeOperand(operand, val)
+	cpu.setFlag(flagCarry, carry)
+	cpu.updateZeroFlag(val)
+	cpu.updateNegativeFlag(val)
+}
+
+func lsr(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+	carry := val&0x01 > 0
+	val = val >> 1
+
+	cpu.writeOperand(operand, val)
+	cpu.setFlag(flagCarry, carry)
+	cpu.updateZeroFlag(val)
+	cpu.setFlag(flagNegative, false)
+}
