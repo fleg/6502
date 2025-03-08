@@ -121,6 +121,36 @@ var ops = [256]*Op{
 	0x76: {"ror", amZeX, 2, 6, ror},
 	0x6e: {"ror", amAbs, 3, 6, ror},
 	0x7e: {"ror", amAbX, 3, 7, ror},
+
+	0x29: {"and", amImm, 2, 2, and},
+	0x25: {"and", amZeP, 2, 3, and},
+	0x35: {"and", amZeX, 2, 4, and},
+	0x2d: {"and", amAbs, 3, 4, and},
+	0x3d: {"and", amAbX, 3, 4, and},
+	0x39: {"and", amAbY, 3, 4, and},
+	0x21: {"and", amInX, 2, 6, and},
+	0x31: {"and", amInY, 2, 5, and},
+
+	0x09: {"ora", amImm, 2, 2, ora},
+	0x05: {"ora", amZeP, 2, 3, ora},
+	0x15: {"ora", amZeX, 2, 4, ora},
+	0x0d: {"ora", amAbs, 3, 4, ora},
+	0x1d: {"ora", amAbX, 3, 4, ora},
+	0x19: {"ora", amAbY, 3, 4, ora},
+	0x01: {"ora", amInX, 2, 6, ora},
+	0x11: {"ora", amInY, 2, 5, ora},
+
+	0x49: {"eor", amImm, 2, 2, eor},
+	0x45: {"eor", amZeP, 2, 3, eor},
+	0x55: {"eor", amZeX, 2, 4, eor},
+	0x4d: {"eor", amAbs, 3, 4, eor},
+	0x5d: {"eor", amAbX, 3, 4, eor},
+	0x59: {"eor", amAbY, 3, 4, eor},
+	0x41: {"eor", amInX, 2, 6, eor},
+	0x51: {"eor", amInY, 2, 5, eor},
+
+	0x24: {"bit", amZeP, 2, 3, bit},
+	0x2c: {"bit", amAbs, 3, 4, bit},
 }
 
 func opcode2op(opcode uint8) *Op {

@@ -296,3 +296,39 @@ func ror(cpu *CPU, operand *Operand) {
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
+
+func and(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	cpu.A = cpu.A & val
+
+	cpu.updateZeroFlag(cpu.A)
+	cpu.updateNegativeFlag(cpu.A)
+}
+
+func ora(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	cpu.A = cpu.A | val
+
+	cpu.updateZeroFlag(cpu.A)
+	cpu.updateNegativeFlag(cpu.A)
+}
+
+func eor(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	cpu.A = cpu.A ^ val
+
+	cpu.updateZeroFlag(cpu.A)
+	cpu.updateNegativeFlag(cpu.A)
+}
+
+func bit(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	val = val & cpu.A
+
+	cpu.updateZeroFlag(val)
+	cpu.updateNegativeFlag(val)
+}
