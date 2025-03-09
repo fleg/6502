@@ -169,6 +169,23 @@ var ops = [256]*Op{
 	0xf9: {"sbc", amAbY, 3, 4, sbc},
 	0xe1: {"sbc", amInX, 2, 6, sbc},
 	0xf1: {"sbc", amInY, 2, 5, sbc},
+
+	0xc9: {"cmp", amImm, 2, 2, cmp},
+	0xc5: {"cmp", amZeP, 2, 3, cmp},
+	0xd5: {"cmp", amZeX, 2, 4, cmp},
+	0xcd: {"cmp", amAbs, 3, 4, cmp},
+	0xdd: {"cmp", amAbX, 3, 4, cmp},
+	0xd9: {"cmp", amAbY, 3, 4, cmp},
+	0xc1: {"cmp", amInX, 2, 6, cmp},
+	0xd1: {"cmp", amInY, 2, 5, cmp},
+
+	0xe0: {"cpx", amImm, 2, 2, cpx},
+	0xe4: {"cpx", amZeP, 2, 3, cpx},
+	0xec: {"cpx", amAbs, 3, 4, cpx},
+
+	0xc0: {"cpy", amImm, 2, 2, cpy},
+	0xc4: {"cpy", amZeP, 2, 3, cpy},
+	0xcc: {"cpy", amAbs, 3, 4, cpy},
 }
 
 func opcode2op(opcode uint8) *Op {
