@@ -332,3 +332,40 @@ func bit(cpu *CPU, operand *Operand) {
 	cpu.updateZeroFlag(val)
 	cpu.updateNegativeFlag(val)
 }
+
+func adc(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	if cpu.getFlag(flagDecimal) {
+		panic("implement decimal adc")
+	} else {
+		sum := uint16(cpu.A) + uint16(val) + uint16(cpu.getCarry())
+		carry := sum > 0xff
+		sum8 := uint8(sum & 0xff)
+
+		cpu.updateOverflowFlag(cpu.A, val, sum8)
+		cpu.A = sum8
+		cpu.setFlag(flagCarry, carry)
+		cpu.updateZeroFlag(cpu.A)
+		cpu.updateNegativeFlag(cpu.A)
+	}
+}
+
+// note sbc === adc with ^mem
+func sbc(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	if cpu.getFlag(flagDecimal) {
+		panic("implement decimal sbc")
+	} else {
+		sub := uint16(cpu.A) - uint16(val) - uint16(1-cpu.getCarry())
+		carry := sub < 0x100
+		sub8 := uint8(sub & 0xff)
+
+		cpu.updateOverflowFlag(cpu.A, ^val, sub8)
+		cpu.A = sub8
+		cpu.setFlag(flagCarry, carry)
+		cpu.updateZeroFlag(cpu.A)
+		cpu.updateNegativeFlag(cpu.A)
+	}
+}

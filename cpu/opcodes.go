@@ -151,6 +151,24 @@ var ops = [256]*Op{
 
 	0x24: {"bit", amZeP, 2, 3, bit},
 	0x2c: {"bit", amAbs, 3, 4, bit},
+
+	0x69: {"adc", amImm, 2, 2, adc},
+	0x65: {"adc", amZeP, 2, 3, adc},
+	0x75: {"adc", amZeX, 2, 4, adc},
+	0x6d: {"adc", amAbs, 3, 4, adc},
+	0x7d: {"adc", amAbX, 3, 4, adc},
+	0x79: {"adc", amAbY, 3, 4, adc},
+	0x61: {"adc", amInX, 2, 6, adc},
+	0x71: {"adc", amInY, 2, 5, adc},
+
+	0xe9: {"sbc", amImm, 2, 2, sbc},
+	0xe5: {"sbc", amZeP, 2, 3, sbc},
+	0xf5: {"sbc", amZeX, 2, 4, sbc},
+	0xed: {"sbc", amAbs, 3, 4, sbc},
+	0xfd: {"sbc", amAbX, 3, 4, sbc},
+	0xf9: {"sbc", amAbY, 3, 4, sbc},
+	0xe1: {"sbc", amInX, 2, 6, sbc},
+	0xf1: {"sbc", amInY, 2, 5, sbc},
 }
 
 func opcode2op(opcode uint8) *Op {
