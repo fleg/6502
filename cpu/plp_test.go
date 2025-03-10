@@ -17,7 +17,7 @@ func TestPlpPullsIntoPAndUpdatesSP(t *testing.T) {
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
-	assert.Equal(t, Flags(0xaa), cpu.PS)
+	assert.Equal(t, Flags(0xaa)|flagUnused|flagBreak, cpu.PS)
 	assert.Equal(t, uint8(0x00), cpu.A)
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)

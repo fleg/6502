@@ -40,7 +40,7 @@ var ops = [256]*Op{
 	0x8e: {"stx", amAbs, 3, 4, stx},
 
 	0x84: {"sty", amZeP, 2, 3, sty},
-	0x94: {"sty", amZeY, 2, 4, sty},
+	0x94: {"sty", amZeX, 2, 4, sty},
 	0x8c: {"sty", amAbs, 3, 4, sty},
 
 	0xaa: {"tax", amImp, 1, 2, tax},

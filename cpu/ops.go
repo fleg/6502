@@ -84,7 +84,7 @@ func txs(cpu *CPU, _ *Operand) {
 }
 
 func tya(cpu *CPU, _ *Operand) {
-	cpu.A = cpu.X
+	cpu.A = cpu.Y
 
 	cpu.updateZeroFlag(cpu.A)
 	cpu.updateNegativeFlag(cpu.A)
@@ -106,7 +106,7 @@ func php(cpu *CPU, _ *Operand) {
 }
 
 func plp(cpu *CPU, _ *Operand) {
-	cpu.PS = Flags(cpu.pop())
+	cpu.PS = Flags(cpu.pop()) | flagBreak | flagUnused
 }
 
 func jmp(cpu *CPU, operand *Operand) {
