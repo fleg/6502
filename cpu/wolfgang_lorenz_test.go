@@ -1,8 +1,9 @@
 package cpu
 
 import (
-	"fmt"
+	"bytes"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,31 +28,30 @@ var petToAscTable = []byte{
 	0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xbb, 0xbc, 0xbd, 0xbe, 0xbf,
 }
 
-// TODO try to embed into testing runner
-func TestWolfgangLorenz(t *testing.T) {
-	t.Skip()
+func loadBinaries(t *testing.T) map[string][]byte {
+	entries, err := os.ReadDir("../test_suites/wolfgang_lorenz/bin")
+	assert.NoError(t, err)
+	assert.Len(t, entries, 265)
 
-	loadBinaries := func() map[string][]byte {
-		entries, err := os.ReadDir("../test_suites/wolfgang_lorenz/bin")
+	result := make(map[string][]byte, 265)
+
+	for _, e := range entries {
+		name := e.Name()
+
+		content, err := os.ReadFile("../test_suites/wolfgang_lorenz/bin/" + name)
 		assert.NoError(t, err)
-		assert.Len(t, entries, 265)
 
-		result := make(map[string][]byte, 265)
-
-		for _, e := range entries {
-			name := e.Name()
-
-			content, err := os.ReadFile("../test_suites/wolfgang_lorenz/bin/" + name)
-			assert.NoError(t, err)
-
-			result[name] = content
-		}
-
-		return result
+		result[name] = content
 	}
 
-	binaries := loadBinaries()
+	return result
+}
+
+func TestWolfgangLorenz(t *testing.T) {
+	binaries := loadBinaries(t)
 	cpu := New()
+
+	var output bytes.Buffer
 
 	load := func(name string) {
 		if name == "trap17" {
@@ -85,7 +85,7 @@ func TestWolfgangLorenz(t *testing.T) {
 		cpu.Memory.writeSlice(0xFF58, []byte{0x6C, 0x14, 0x03})
 
 		cpu.SP = 0xfd
-		cpu.PS = flagInterrupt | flagUnused | flagBreak
+		cpu.PS = flagInterrupt
 		cpu.PC = 0x0801
 	}
 
@@ -97,9 +97,29 @@ func TestWolfgangLorenz(t *testing.T) {
 		// print char
 		if cpu.PC == 0xffd2 {
 			cpu.Memory.Write(0x030c, 0x00)
-			c := petToAscTable[cpu.A]
-			fmt.Printf("%c", c)
 			cpu.PC = cpu.popWord() + 1
+
+			c := petToAscTable[cpu.A]
+			output.WriteByte(c)
+
+			if c == '\n' {
+				line, err := output.ReadString('\n')
+				if err == nil {
+					if strings.HasPrefix(line, "\x91") {
+						if strings.HasSuffix(line, "ok\n") {
+							t.Run(line[1:len(line)-6], func(t *testing.T) {})
+						} else {
+							t.Run(line[1:len(line)-1], func(t *testing.T) {
+								t.Log("        mem a  x  y  flags    sp")
+								t.Fail()
+							})
+						}
+					}
+					if strings.HasPrefix(line, "right") || strings.HasPrefix(line, "before") || strings.HasPrefix(line, "after") {
+						t.Log(line[:len(line)-1])
+					}
+				}
+			}
 		}
 
 		// load
@@ -108,8 +128,8 @@ func TestWolfgangLorenz(t *testing.T) {
 			len := cpu.Memory.Read(0x00b7)
 			name := ""
 
-			for i := range len {
-				name = name + string(petToAscTable[cpu.Memory.Read(addr+uint16(i))])
+			for i := range uint16(len) {
+				name = name + string(petToAscTable[cpu.Memory.Read(addr+i)])
 			}
 
 			load(name)
@@ -118,18 +138,15 @@ func TestWolfgangLorenz(t *testing.T) {
 			cpu.PC = 0x0816
 		}
 
-		// scan keyboard
+		// scan
 		if cpu.PC == 0xffe4 {
-			fmt.Println("\n >> scan")
 			cpu.A = 0x03
 			cpu.PC = cpu.popWord() + 1
 		}
 
 		// exit
 		if cpu.PC == 0x8000 || cpu.PC == 0xa474 {
-			fmt.Println(" >> exit")
-			os.Exit(0)
+			break
 		}
 	}
-
 }

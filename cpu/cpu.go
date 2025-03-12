@@ -65,8 +65,6 @@ func (cpu *CPU) Step() {
 	opcode := cpu.readPC()
 	op := opcode2op(opcode)
 
-	//fmt.Println(op.Name)
-
 	operand := cpu.fetchOperand(op.AddressMode)
 	op.Do(cpu, operand)
 
