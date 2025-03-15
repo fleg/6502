@@ -35,7 +35,7 @@ func TestBitAbsoluteSetsZero(t *testing.T) {
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
-	assert.Equal(t, flagZero, cpu.PS)
+	assert.Equal(t, flagZero|flagNegative, cpu.PS)
 	assert.Equal(t, uint8(0x55), cpu.A)
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)

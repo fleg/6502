@@ -16,7 +16,7 @@ func TestRtiPullsPCAndPSAndUpdatePC(t *testing.T) {
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xc003), cpu.PC)
-	assert.Equal(t, flagCarry|flagUnused, cpu.PS)
+	assert.Equal(t, flagCarry|flagBreak|flagUnused, cpu.PS)
 	assert.Equal(t, uint8(0x00), cpu.A)
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)

@@ -61,6 +61,20 @@ func (cpu *CPU) readWord(addr uint16) uint16 {
 	return word(lo, hi)
 }
 
+func (cpu *CPU) readWordWithoutPageCross(addr uint16) uint16 {
+	lo := cpu.Memory.Read(addr)
+
+	if addr&0x00ff == 0x00ff {
+		addr = addr & 0xff00
+	} else {
+		addr += 1
+	}
+
+	hi := cpu.Memory.Read(addr)
+
+	return word(lo, hi)
+}
+
 func (cpu *CPU) Step() {
 	opcode := cpu.readPC()
 	op := opcode2op(opcode)
@@ -108,7 +122,7 @@ func (cpu *CPU) fetchOperandAddress(am AddressMode) uint16 {
 	case amAbY:
 		return cpu.readPCWord() + uint16(cpu.Y)
 	case amInd:
-		return cpu.readWord(cpu.readPCWord())
+		return cpu.readWordWithoutPageCross(cpu.readPCWord())
 	case amInX:
 		addr := uint16(cpu.readPC() + cpu.X)
 		return cpu.readWord(addr)

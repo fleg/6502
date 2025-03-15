@@ -140,7 +140,7 @@ func rti(cpu *CPU, _ *Operand) {
 	cpu.PC = cpu.popWord()
 
 	cpu.setFlag(flagUnused, true)
-	cpu.setFlag(flagBreak, false)
+	cpu.setFlag(flagBreak, true)
 }
 
 func branch(cpu *CPU, operand *Operand, flag Flags, isSet bool) {
@@ -327,17 +327,40 @@ func eor(cpu *CPU, operand *Operand) {
 func bit(cpu *CPU, operand *Operand) {
 	val := cpu.readOperand(operand)
 
-	val = val & cpu.A
-
-	cpu.updateZeroFlag(val)
+	cpu.updateZeroFlag(val & cpu.A)
 	cpu.updateNegativeFlag(val)
+	cpu.setFlag(flagOverflow, val&uint8(flagOverflow) > 0)
 }
 
 func adc(cpu *CPU, operand *Operand) {
 	val := cpu.readOperand(operand)
 
 	if cpu.getFlag(flagDecimal) {
-		panic("implement decimal adc")
+		loCarry := uint8(0)
+		hiCarry := false
+		loAdj := uint8(0)
+		hiAdj := uint8(0)
+
+		loSum := val&0x0f + cpu.A&0x0f + cpu.getCarry()
+		if loSum > 0x09 {
+			loAdj = 0x06
+			loCarry = 1
+		}
+
+		hiSum := (val>>4)&0x0f + (cpu.A>>4)&0x0f + loCarry
+		if hiSum > 0x09 {
+			hiAdj = 0x06
+			hiCarry = true
+		}
+
+		sum := ((hiSum & 0x0f) << 4) + loSum&0x0f
+		sumAdj := (((hiSum + hiAdj) & 0x0f) << 4) | (loSum+loAdj)&0x0f
+
+		cpu.updateOverflowFlag(cpu.A, val, sum)
+		cpu.A = sumAdj
+		cpu.setFlag(flagCarry, hiCarry)
+		cpu.updateZeroFlag(sum)
+		cpu.updateNegativeFlag(sum)
 	} else {
 		sum := uint16(cpu.A) + uint16(val) + uint16(cpu.getCarry())
 		carry := sum > 0xff
@@ -356,7 +379,35 @@ func sbc(cpu *CPU, operand *Operand) {
 	val := cpu.readOperand(operand)
 
 	if cpu.getFlag(flagDecimal) {
-		panic("implement decimal sbc")
+		loCarry := uint8(1)
+		hiCarry := false
+		loAdj := uint8(0)
+		hiAdj := uint8(0)
+
+		loSum := (^val)&0x0f + cpu.A&0x0f + cpu.getCarry()
+		if loSum <= 0x0f {
+			loAdj = 0x0a
+			loCarry = 0
+		}
+
+		hiSum := ((^val)>>4)&0x0f + (cpu.A>>4)&0x0f + loCarry
+		if hiSum <= 0x0f {
+			hiAdj = 0xa0
+		}
+
+		sum := uint16(cpu.A) + uint16(^val)&0xff + uint16(cpu.getCarry())
+		sum8 := uint8(sum & 0xff)
+		sumAdj := ((sum8 + hiAdj) & 0xf0) | (sum8+loAdj)&0x0f
+
+		if sum > 0xff {
+			hiCarry = true
+		}
+
+		cpu.updateOverflowFlag(cpu.A, ^val, sum8)
+		cpu.A = sumAdj
+		cpu.setFlag(flagCarry, hiCarry)
+		cpu.updateZeroFlag(sum8)
+		cpu.updateNegativeFlag(sum8)
 	} else {
 		sub := uint16(cpu.A) - uint16(val) - uint16(1-cpu.getCarry())
 		carry := sub < 0x100
@@ -373,7 +424,7 @@ func sbc(cpu *CPU, operand *Operand) {
 func compare(cpu *CPU, src uint8, mem uint8) {
 	cpu.setFlag(flagCarry, src >= mem)
 	cpu.setFlag(flagZero, src == mem)
-	cpu.setFlag(flagNegative, src < mem)
+	cpu.updateNegativeFlag(src - mem)
 }
 
 func cmp(cpu *CPU, operand *Operand) {

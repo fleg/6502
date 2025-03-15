@@ -110,13 +110,16 @@ func TestWolfgangLorenz(t *testing.T) {
 							t.Run(line[1:len(line)-6], func(t *testing.T) {})
 						} else {
 							t.Run(line[1:len(line)-1], func(t *testing.T) {
-								t.Log("        mem a  x  y  flags    sp")
 								t.Fail()
 							})
 						}
-					}
-					if strings.HasPrefix(line, "right") || strings.HasPrefix(line, "before") || strings.HasPrefix(line, "after") {
-						t.Log(line[:len(line)-1])
+					} else {
+						if strings.HasPrefix(line, "before") {
+							t.Log("        arg a  x  y  flags    sp")
+						}
+						if strings.ContainsAny(line, " ") {
+							t.Log(line[:len(line)-1])
+						}
 					}
 				}
 			}
