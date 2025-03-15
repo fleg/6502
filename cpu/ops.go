@@ -421,26 +421,22 @@ func sbc(cpu *CPU, operand *Operand) {
 	}
 }
 
-func compare(cpu *CPU, src uint8, mem uint8) {
-	cpu.setFlag(flagCarry, src >= mem)
-	cpu.setFlag(flagZero, src == mem)
-	cpu.updateNegativeFlag(src - mem)
+func compare(cpu *CPU, operand *Operand, src uint8) {
+	val := cpu.readOperand(operand)
+
+	cpu.setFlag(flagCarry, src >= val)
+	cpu.setFlag(flagZero, src == val)
+	cpu.updateNegativeFlag(src - val)
 }
 
 func cmp(cpu *CPU, operand *Operand) {
-	val := cpu.readOperand(operand)
-
-	compare(cpu, cpu.A, val)
+	compare(cpu, operand, cpu.A)
 }
 
 func cpx(cpu *CPU, operand *Operand) {
-	val := cpu.readOperand(operand)
-
-	compare(cpu, cpu.X, val)
+	compare(cpu, operand, cpu.X)
 }
 
 func cpy(cpu *CPU, operand *Operand) {
-	val := cpu.readOperand(operand)
-
-	compare(cpu, cpu.Y, val)
+	compare(cpu, operand, cpu.Y)
 }
