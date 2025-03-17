@@ -440,3 +440,153 @@ func cpx(cpu *CPU, operand *Operand) {
 func cpy(cpu *CPU, operand *Operand) {
 	compare(cpu, operand, cpu.Y)
 }
+
+func slo(cpu *CPU, operand *Operand) {
+	asl(cpu, operand)
+	ora(cpu, operand)
+}
+
+func rla(cpu *CPU, operand *Operand) {
+	rol(cpu, operand)
+	and(cpu, operand)
+}
+
+func sre(cpu *CPU, operand *Operand) {
+	lsr(cpu, operand)
+	eor(cpu, operand)
+}
+
+func rra(cpu *CPU, operand *Operand) {
+	ror(cpu, operand)
+	adc(cpu, operand)
+}
+
+func dcp(cpu *CPU, operand *Operand) {
+	dec(cpu, operand)
+	cmp(cpu, operand)
+}
+
+func isc(cpu *CPU, operand *Operand) {
+	inc(cpu, operand)
+	sbc(cpu, operand)
+}
+
+func lax(cpu *CPU, operand *Operand) {
+	lda(cpu, operand)
+	ldx(cpu, operand)
+}
+
+func sax(cpu *CPU, operand *Operand) {
+	cpu.writeOperand(operand, cpu.A&cpu.X)
+}
+
+func anc(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	cpu.A = cpu.A & val
+	cpu.updateZeroFlag(cpu.A)
+	cpu.updateNegativeFlag(cpu.A)
+	cpu.setFlag(flagCarry, cpu.getFlag(flagNegative))
+}
+
+func asr(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	and := cpu.A & val
+
+	cpu.A = and >> 1
+	cpu.setFlag(flagNegative, false)
+	cpu.updateZeroFlag(cpu.A)
+	cpu.setFlag(flagCarry, and&0x01 > 0)
+}
+
+func arr(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	if cpu.getFlag(flagDecimal) {
+		// undocumented magic
+		// https://github.com/vbt1/fba_saturn/blob/d1dade09813b397c6c3abab418842c109c7e2bd2/m6502.new/ill02.h#L71
+		res := uint16(val) & uint16(cpu.A)
+		lo := res & 0x0f
+		hi := res & 0xf0
+		and := res
+
+		res = uint16(cpu.PS&flagCarry)<<7 | res>>1
+		cpu.updateNegativeFlag(uint8(res))
+		cpu.updateZeroFlag(uint8(res))
+		cpu.setFlag(flagOverflow, (and^res)&uint16(flagOverflow) > 0)
+
+		if lo+(lo&0x01) > 0x05 {
+			res = (res & 0xf0) | ((res + 0x06) & 0x0f)
+		}
+
+		if hi+(hi&0x10) > 0x50 {
+			cpu.setFlag(flagCarry, true)
+			res = res + 0x60
+		} else {
+			cpu.setFlag(flagCarry, false)
+		}
+
+		cpu.A = uint8(res & 0xff)
+	} else {
+		cpu.A = uint8(cpu.PS&flagCarry)<<7 | (val&cpu.A)>>1
+		cpu.updateZeroFlag(cpu.A)
+		cpu.updateNegativeFlag(cpu.A)
+		cpu.setFlag(flagOverflow, (cpu.A&uint8(flagOverflow) > 0) != (cpu.A&uint8(flagUnused) > 0))
+		cpu.setFlag(flagCarry, cpu.A&uint8(flagOverflow) > 0)
+	}
+}
+
+func xaa(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	cpu.A = (cpu.A | magic) & cpu.X & val
+	cpu.updateZeroFlag(cpu.A)
+	cpu.updateNegativeFlag(cpu.A)
+}
+
+func lxa(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	cpu.A = (cpu.A | magic) & val
+	cpu.X = cpu.A
+	cpu.updateZeroFlag(cpu.A)
+	cpu.updateNegativeFlag(cpu.A)
+}
+
+func las(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+
+	cpu.SP = cpu.SP & val
+	cpu.A = cpu.SP
+	cpu.X = cpu.SP
+	cpu.updateZeroFlag(cpu.SP)
+	cpu.updateNegativeFlag(cpu.SP)
+}
+
+func sbx(cpu *CPU, operand *Operand) {
+	val := cpu.readOperand(operand)
+	and := cpu.A & cpu.X
+
+	cpu.X = and - val
+	cpu.updateZeroFlag(cpu.X)
+	cpu.updateNegativeFlag(cpu.X)
+	cpu.setFlag(flagCarry, and >= val)
+}
+
+func sha(cpu *CPU, operand *Operand) {
+	cpu.writeOperand(operand, cpu.A&cpu.X&(1+uint8(operand.Address>>8)))
+}
+
+func shx(cpu *CPU, operand *Operand) {
+	cpu.writeOperand(operand, cpu.X&(1+uint8(operand.Address>>8)))
+}
+
+func shy(cpu *CPU, operand *Operand) {
+	cpu.writeOperand(operand, cpu.Y&(1+uint8(operand.Address>>8)))
+}
+
+func shs(cpu *CPU, operand *Operand) {
+	cpu.SP = cpu.A & cpu.X
+	cpu.writeOperand(operand, cpu.SP&(1+uint8(operand.Address>>8)))
+}

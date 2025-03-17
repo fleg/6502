@@ -5,6 +5,7 @@ const (
 	irqVector   = 0xfffe
 	stackInit   = 0xfd
 	stackBase   = 0x0100
+	magic       = 0xee
 )
 
 // The processor is little endian and expects
