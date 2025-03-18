@@ -3,7 +3,6 @@ package cpu
 import (
 	"bytes"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,14 +49,11 @@ func loadBinaries(t *testing.T) map[string][]byte {
 func TestWolfgangLorenz(t *testing.T) {
 	binaries := loadBinaries(t)
 	cpu := New()
-
 	var output bytes.Buffer
+	testName := "start"
+	fail := false
 
-	load := func(name string) bool {
-		if name == "trap17" {
-			return true
-		}
-
+	load := func(name string) {
 		bin, ok := binaries[name]
 		assert.True(t, ok)
 
@@ -87,73 +83,65 @@ func TestWolfgangLorenz(t *testing.T) {
 		cpu.SP = 0xfd
 		cpu.PS = flagInterrupt
 		cpu.PC = 0x0801
-
-		return false
 	}
 
-	load("start")
-
 	for {
-		cpu.Step()
+		if testName == "trap17" || fail {
+			break
+		}
 
-		// print char
-		if cpu.PC == 0xffd2 {
-			cpu.Memory.Write(0x030c, 0x00)
-			cpu.PC = cpu.popWord() + 1
+		t.Run(testName, func(t *testing.T) {
+			load(testName)
 
-			c := petToAscTable[cpu.A]
-			output.WriteByte(c)
+			for {
+				cpu.Step()
 
-			if c == '\n' {
-				line, err := output.ReadString('\n')
-				if err == nil {
-					if strings.HasPrefix(line, "\x91") {
-						if strings.HasSuffix(line, "ok\n") {
-							t.Run(line[1:len(line)-6], func(t *testing.T) {})
-						} else {
-							t.Run(line[1:len(line)-1], func(t *testing.T) {
-								t.Fail()
-							})
-						}
-					} else {
-						if strings.HasPrefix(line, "before") {
-							t.Log("        arg a  x  y  flags    sp")
-						}
-						if strings.ContainsAny(line, " ") {
+				// print char
+				if cpu.PC == 0xffd2 {
+					cpu.Memory.Write(0x030c, 0x00)
+					cpu.PC = cpu.popWord() + 1
+
+					c := petToAscTable[cpu.A]
+					if c != '\x91' {
+						output.WriteByte(c)
+					}
+
+					if c == '\n' {
+						line, err := output.ReadString('\n')
+						if err == nil {
 							t.Log(line[:len(line)-1])
 						}
 					}
 				}
+
+				// load
+				if cpu.PC == 0xe16f {
+					addr := word(cpu.Memory.Read(0x00bb), cpu.Memory.Read(0x00bc))
+					len := cpu.Memory.Read(0x00b7)
+					testName = ""
+
+					for i := range uint16(len) {
+						testName += string(petToAscTable[cpu.Memory.Read(addr+i)])
+					}
+
+					cpu.popWord()
+					cpu.PC = 0x0816
+					break
+				}
+
+				// scan
+				if cpu.PC == 0xffe4 {
+					cpu.A = 0x03
+					cpu.PC = cpu.popWord() + 1
+				}
+
+				// exit
+				if cpu.PC == 0x8000 || cpu.PC == 0xa474 {
+					fail = true
+					t.Fail()
+					break
+				}
 			}
-		}
-
-		// load
-		if cpu.PC == 0xe16f {
-			addr := word(cpu.Memory.Read(0x00bb), cpu.Memory.Read(0x00bc))
-			len := cpu.Memory.Read(0x00b7)
-			name := ""
-
-			for i := range uint16(len) {
-				name = name + string(petToAscTable[cpu.Memory.Read(addr+i)])
-			}
-
-			if load(name) {
-				break
-			}
-
-			cpu.popWord()
-			cpu.PC = 0x0816
-		}
-
-		// scan
-		if cpu.PC == 0xffe4 {
-			cpu.A = 0x03
-			cpu.PC = cpu.popWord() + 1
-		}
-
-		// exit
-		if cpu.PC == 0x8000 || cpu.PC == 0xa474 {
-			break
-		}
+		})
 	}
 }
