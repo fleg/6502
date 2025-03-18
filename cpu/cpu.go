@@ -126,14 +126,10 @@ func (cpu *CPU) fetchOperandAddress(am AddressMode) uint16 {
 		return cpu.readWordWithoutPageCross(cpu.readPCWord())
 	case amInX:
 		addr := uint16(cpu.readPC() + cpu.X)
-		return cpu.readWord(addr)
+		return cpu.readWordWithoutPageCross(addr)
 	case amInY:
-		zp := uint16(cpu.readPC())
-		sum := uint16(cpu.Memory.Read(zp)) + uint16(cpu.Y)
-		carry := uint8(sum >> 8)
-		lo := uint8(sum & 0x00ff)
-		hi := cpu.Memory.Read(zp+1) + carry
-		return word(lo, hi)
+		addr := cpu.readWordWithoutPageCross(uint16(cpu.readPC()))
+		return addr + uint16(cpu.Y)
 	default:
 		panic("Unknown address mode")
 	}
