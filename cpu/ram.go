@@ -1,9 +1,9 @@
 package cpu
 
-const memCapacity = 64 * 1024
+const memSize = 64 * 1024
 
 type RAM struct {
-	values [memCapacity]uint8
+	values [memSize]uint8
 }
 
 func (m *RAM) Read(addr uint16) uint8 {
