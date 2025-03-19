@@ -1,16 +1,18 @@
 package cpu
 
 type Op struct {
-	Name        string
-	AddressMode AddressMode
-	Size        uint16
-	Ticks       uint8
-	Do          func(*CPU, *Operand)
+	Name          string
+	AddressMode   AddressMode
+	Size          uint16
+	Ticks         uint8
+	Do            func(*CPU, *Operand)
+	PageCrossTick uint8
 }
 
 type Operand struct {
 	Address     uint16
 	AddressMode AddressMode
+	PageCrossed bool
 }
 
 func nop(_ *CPU, _ *Operand) {}
@@ -146,6 +148,11 @@ func rti(cpu *CPU, _ *Operand) {
 func branch(cpu *CPU, operand *Operand, flag Flags, isSet bool) {
 	if isSet == cpu.getFlag(flag) {
 		cpu.PC = operand.Address
+
+		cpu.totalTicks += 1
+		if operand.PageCrossed {
+			cpu.totalTicks += 1
+		}
 	}
 }
 

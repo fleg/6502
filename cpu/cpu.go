@@ -18,6 +18,7 @@ type CPU struct {
 
 	memory     Memory
 	totalTicks uint64
+	totalOps   uint64
 }
 
 func New(mem Memory) *CPU {
@@ -88,13 +89,20 @@ func (cpu *CPU) Step() {
 	op.Do(cpu, operand)
 
 	cpu.totalTicks += uint64(op.Ticks)
-	// TODO handle extra page cross ticks
+	if operand.PageCrossed {
+		cpu.totalTicks += uint64(op.PageCrossTick)
+	}
+
+	cpu.totalOps += 1
 }
 
 func (cpu *CPU) fetchOperand(am AddressMode) *Operand {
+	addr, pageCrossed := cpu.fetchOperandAddress(am)
+
 	return &Operand{
-		Address:     cpu.fetchOperandAddress(am),
+		Address:     addr,
 		AddressMode: am,
+		PageCrossed: pageCrossed,
 	}
 }
 
