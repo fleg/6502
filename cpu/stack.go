@@ -13,8 +13,8 @@ func (cpu *CPU) pop() uint8 {
 }
 
 func (cpu *CPU) pushWord(val uint16) {
-	cpu.push(uint8((val & 0xff00) >> 8))
-	cpu.push(uint8(val & 0x00ff))
+	cpu.push(wordMSB(val))
+	cpu.push(wordLSB(val))
 }
 
 func (cpu *CPU) popWord() uint16 {

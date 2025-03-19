@@ -575,18 +575,18 @@ func sbx(cpu *CPU, operand *Operand) {
 }
 
 func sha(cpu *CPU, operand *Operand) {
-	cpu.writeOperand(operand, cpu.A&cpu.X&(1+uint8(operand.Address>>8)))
+	cpu.writeOperand(operand, cpu.A&cpu.X&(1+wordMSB(operand.Address)))
 }
 
 func shx(cpu *CPU, operand *Operand) {
-	cpu.writeOperand(operand, cpu.X&(1+uint8(operand.Address>>8)))
+	cpu.writeOperand(operand, cpu.X&(1+wordMSB(operand.Address)))
 }
 
 func shy(cpu *CPU, operand *Operand) {
-	cpu.writeOperand(operand, cpu.Y&(1+uint8(operand.Address>>8)))
+	cpu.writeOperand(operand, cpu.Y&(1+wordMSB(operand.Address)))
 }
 
 func shs(cpu *CPU, operand *Operand) {
 	cpu.SP = cpu.A & cpu.X
-	cpu.writeOperand(operand, cpu.SP&(1+uint8(operand.Address>>8)))
+	cpu.writeOperand(operand, cpu.SP&(1+wordMSB(operand.Address)))
 }

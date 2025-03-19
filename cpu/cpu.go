@@ -113,7 +113,3 @@ func (cpu *CPU) writeOperand(operand *Operand, val uint8) {
 		cpu.write(operand.Address, val)
 	}
 }
-
-func word(lo uint8, hi uint8) uint16 {
-	return uint16(hi)<<8 | uint16(lo)
-}
