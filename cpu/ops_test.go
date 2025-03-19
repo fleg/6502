@@ -7,13 +7,13 @@ import (
 )
 
 func TestAdcAbsoluteClearZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.PS = flagZero
 
 	// $0000 adc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x6d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -22,17 +22,17 @@ func TestAdcAbsoluteClearZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestAdcAbsoluteAddMemWithCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 	cpu.PS = flagCarry
 
 	// $0000 adc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x6d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -41,16 +41,16 @@ func TestAdcAbsoluteAddMemWithCarry(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestAdcAbsoluteAddMemSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 adc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0x6d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -59,16 +59,16 @@ func TestAdcAbsoluteAddMemSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x80), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x80), cpu.read(0xabcd))
 }
 
 func TestAdcAbsoluteAddMemSetsOverflowBothPositive(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x7f
 
 	// $0000 adc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x7f)
+	cpu.writeSlice(0x0000, []uint8{0x6d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x7f)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -77,16 +77,16 @@ func TestAdcAbsoluteAddMemSetsOverflowBothPositive(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x7f), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x7f), cpu.read(0xabcd))
 }
 
 func TestAdcAbsoluteAddMemSetsOverflowBothNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x80
 
 	// $0000 adc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0x6d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -95,16 +95,16 @@ func TestAdcAbsoluteAddMemSetsOverflowBothNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x80), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x80), cpu.read(0xabcd))
 }
 
 func TestAndAbsoluteAndWithMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x0f
 
 	// $0000 and $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x04)
+	cpu.writeSlice(0x0000, []uint8{0x2d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x04)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -113,16 +113,16 @@ func TestAndAbsoluteAndWithMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x04), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x04), cpu.read(0xabcd))
 }
 
 func TestAndAbsoluteAndWithMemSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x55
 
 	// $0000 and $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0xaa)
+	cpu.writeSlice(0x0000, []uint8{0x2d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0xaa)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -131,16 +131,16 @@ func TestAndAbsoluteAndWithMemSetsZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0xaa), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0xaa), cpu.read(0xabcd))
 }
 
 func TestAndAbsoluteAndWithMemSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x80
 
 	// $0000 and $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x81)
+	cpu.writeSlice(0x0000, []uint8{0x2d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x81)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -149,15 +149,15 @@ func TestAndAbsoluteAndWithMemSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x81), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x81), cpu.read(0xabcd))
 }
 
 func TestAslAccumulatorShiftsA(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 asl a
-	cpu.Memory.Write(0x0000, 0x0a)
+	cpu.write(0x0000, 0x0a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -169,11 +169,11 @@ func TestAslAccumulatorShiftsA(t *testing.T) {
 }
 
 func TestAslAccumulatorShiftsASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x80
 
 	// $0000 asl a
-	cpu.Memory.Write(0x0000, 0x0a)
+	cpu.write(0x0000, 0x0a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -185,11 +185,11 @@ func TestAslAccumulatorShiftsASetsCarryAndZero(t *testing.T) {
 }
 
 func TestAslAccumulatorShiftsASetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x55
 
 	// $0000 asl a
-	cpu.Memory.Write(0x0000, 0x0a)
+	cpu.write(0x0000, 0x0a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -201,11 +201,11 @@ func TestAslAccumulatorShiftsASetsNegative(t *testing.T) {
 }
 
 func TestAslAbsoluteShiftsMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 asl $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x0e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x0e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -214,15 +214,15 @@ func TestAslAbsoluteShiftsMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x02), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x02), cpu.read(0xabcd))
 }
 
 func TestAslAbsoluteShiftsASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 asl $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x0e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0x0e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -231,15 +231,15 @@ func TestAslAbsoluteShiftsASetsCarryAndZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x00), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x00), cpu.read(0xabcd))
 }
 
 func TestAslAbsoluteShiftsASetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 asl $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x0e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x55)
+	cpu.writeSlice(0x0000, []uint8{0x0e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x55)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -248,14 +248,14 @@ func TestAslAbsoluteShiftsASetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0xaa), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0xaa), cpu.read(0xabcd))
 }
 
 func TestBccCarryClearJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BCC +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x90, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x90, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -267,11 +267,11 @@ func TestBccCarryClearJumpsForward(t *testing.T) {
 }
 
 func TestBccCarryClearJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 
 	// $0008 BCC -6
-	cpu.Memory.writeSlice(0x0008, []byte{0x90, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0x90, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -283,11 +283,11 @@ func TestBccCarryClearJumpsBackward(t *testing.T) {
 }
 
 func TestBccCarrySetDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagCarry
 
 	// $0000 BCC +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x90, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x90, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -299,11 +299,11 @@ func TestBccCarrySetDoesNotJump(t *testing.T) {
 }
 
 func TestBcsCarrySetJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagCarry
 
 	// $0000 BCS +6
-	cpu.Memory.writeSlice(0x0000, []byte{0xb0, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0xb0, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -315,12 +315,12 @@ func TestBcsCarrySetJumpsForward(t *testing.T) {
 }
 
 func TestBccCarrySetJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 	cpu.PS = flagCarry
 
 	// $0008 BCS -6
-	cpu.Memory.writeSlice(0x0008, []byte{0xb0, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0xb0, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -332,10 +332,10 @@ func TestBccCarrySetJumpsBackward(t *testing.T) {
 }
 
 func TestBccCarryCleanDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BCS +6
-	cpu.Memory.writeSlice(0x0000, []byte{0xb0, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0xb0, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -347,11 +347,11 @@ func TestBccCarryCleanDoesNotJump(t *testing.T) {
 }
 
 func TestBeqZeroSetJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagZero
 
 	// $0000 BEQ +6
-	cpu.Memory.writeSlice(0x0000, []byte{0xf0, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0xf0, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -363,12 +363,12 @@ func TestBeqZeroSetJumpsForward(t *testing.T) {
 }
 
 func TestBeqZeroSetJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 	cpu.PS = flagZero
 
 	// $0008 BEQ -6
-	cpu.Memory.writeSlice(0x0008, []byte{0xf0, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0xf0, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -380,10 +380,10 @@ func TestBeqZeroSetJumpsBackward(t *testing.T) {
 }
 
 func TestBeqZeroCleanDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BEQ +6
-	cpu.Memory.writeSlice(0x0000, []byte{0xf0, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0xf0, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -395,13 +395,13 @@ func TestBeqZeroCleanDoesNotJump(t *testing.T) {
 }
 
 func TestBitAbsoluteClearZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 	cpu.PS = flagZero
 
 	// $0000 bit $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2c, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x2c, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -410,16 +410,16 @@ func TestBitAbsoluteClearZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestBitAbsoluteSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x55
 
 	// $0000 bit $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2c, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0xaa)
+	cpu.writeSlice(0x0000, []uint8{0x2c, 0xcd, 0xab})
+	cpu.write(0xabcd, 0xaa)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -428,17 +428,17 @@ func TestBitAbsoluteSetsZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0xaa), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0xaa), cpu.read(0xabcd))
 }
 
 func TestBitAbsoluteClearNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x81
 	cpu.PS = flagNegative
 
 	// $0000 bit $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2c, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x2c, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -447,16 +447,16 @@ func TestBitAbsoluteClearNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestBitAbsoluteSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x80
 
 	// $0000 bit $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2c, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x81)
+	cpu.writeSlice(0x0000, []uint8{0x2c, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x81)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -465,15 +465,15 @@ func TestBitAbsoluteSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x81), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x81), cpu.read(0xabcd))
 }
 
 func TestBmiNegativeSetJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagNegative
 
 	// $0000 BMI +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x30, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x30, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -485,12 +485,12 @@ func TestBmiNegativeSetJumpsForward(t *testing.T) {
 }
 
 func TestBmiNegativeSetJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 	cpu.PS = flagNegative
 
 	// $0008 BMI -6
-	cpu.Memory.writeSlice(0x0008, []byte{0x30, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0x30, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -502,10 +502,10 @@ func TestBmiNegativeSetJumpsBackward(t *testing.T) {
 }
 
 func TestBmiNegativeClearDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BMI +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x30, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x30, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -517,10 +517,10 @@ func TestBmiNegativeClearDoesNotJump(t *testing.T) {
 }
 
 func TestBneZeroClearJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BNE +6
-	cpu.Memory.writeSlice(0x0000, []byte{0xd0, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0xd0, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -532,11 +532,11 @@ func TestBneZeroClearJumpsForward(t *testing.T) {
 }
 
 func TestBneZeroClearJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 
 	// $0008 BEQ -6
-	cpu.Memory.writeSlice(0x0008, []byte{0xd0, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0xd0, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -548,11 +548,11 @@ func TestBneZeroClearJumpsBackward(t *testing.T) {
 }
 
 func TestBneZeroSetDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagZero
 
 	// $0000 BEQ +6
-	cpu.Memory.writeSlice(0x0000, []byte{0xd0, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0xd0, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -564,10 +564,10 @@ func TestBneZeroSetDoesNotJump(t *testing.T) {
 }
 
 func TestBplNegativeClearJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BPL +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x10, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x10, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -579,11 +579,11 @@ func TestBplNegativeClearJumpsForward(t *testing.T) {
 }
 
 func TestBplNegativeClearJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 
 	// $0008 BPL -6
-	cpu.Memory.writeSlice(0x0008, []byte{0x10, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0x10, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -595,11 +595,11 @@ func TestBplNegativeClearJumpsBackward(t *testing.T) {
 }
 
 func TestBplNegativeSetDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagNegative
 
 	// $0000 BPL +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x10, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x10, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -611,13 +611,13 @@ func TestBplNegativeSetDoesNotJump(t *testing.T) {
 }
 
 func TestBrkPushesPCAndPSAndUpdatePC(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0xc000
 	cpu.SP = 0xfd
 
 	// $c000 BRK
-	cpu.Memory.Write(0xc000, 0x00)
-	cpu.Memory.writeSlice(0xfffe, []byte{0xcd, 0xab})
+	cpu.write(0xc000, 0x00)
+	cpu.writeSlice(0xfffe, []uint8{0xcd, 0xab})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xabcd), cpu.PC)
@@ -626,16 +626,16 @@ func TestBrkPushesPCAndPSAndUpdatePC(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0xfa), cpu.SP)
-	assert.Equal(t, uint8(0xc0), cpu.Memory.Read(0x01fd))
-	assert.Equal(t, uint8(0x02), cpu.Memory.Read(0x01fc))
-	assert.Equal(t, uint8(flagUnused|flagBreak), cpu.Memory.Read(0x01fb))
+	assert.Equal(t, uint8(0xc0), cpu.read(0x01fd))
+	assert.Equal(t, uint8(0x02), cpu.read(0x01fc))
+	assert.Equal(t, uint8(flagUnused|flagBreak), cpu.read(0x01fb))
 }
 
 func TestBvcOverflowClearJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BVC +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x50, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x50, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -647,11 +647,11 @@ func TestBvcOverflowClearJumpsForward(t *testing.T) {
 }
 
 func TestBvcOverflowClearJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 
 	// $0008 BVC -6
-	cpu.Memory.writeSlice(0x0008, []byte{0x50, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0x50, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -663,11 +663,11 @@ func TestBvcOverflowClearJumpsBackward(t *testing.T) {
 }
 
 func TestBvcOverflowSetDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagOverflow
 
 	// $0000 BVC +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x50, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x50, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -679,11 +679,11 @@ func TestBvcOverflowSetDoesNotJump(t *testing.T) {
 }
 
 func TestBvsOverflowSetJumpsForward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagOverflow
 
 	// $0000 BVS +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x70, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x70, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0008), cpu.PC)
@@ -695,12 +695,12 @@ func TestBvsOverflowSetJumpsForward(t *testing.T) {
 }
 
 func TestBvsOverflowSetJumpsBackward(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0x0008
 	cpu.PS = flagOverflow
 
 	// $0008 BVS -6
-	cpu.Memory.writeSlice(0x0008, []byte{0x70, 0xfa})
+	cpu.writeSlice(0x0008, []uint8{0x70, 0xfa})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0004), cpu.PC)
@@ -712,10 +712,10 @@ func TestBvsOverflowSetJumpsBackward(t *testing.T) {
 }
 
 func TestBvsOverflowCleanDoesNotJump(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 BVS +6
-	cpu.Memory.writeSlice(0x0000, []byte{0x70, 0x06})
+	cpu.writeSlice(0x0000, []uint8{0x70, 0x06})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -727,11 +727,11 @@ func TestBvsOverflowCleanDoesNotJump(t *testing.T) {
 }
 
 func TestClcClearsCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = 0xff
 
 	// $0000 clc
-	cpu.Memory.Write(0x0000, 0x18)
+	cpu.write(0x0000, 0x18)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -743,11 +743,11 @@ func TestClcClearsCarry(t *testing.T) {
 }
 
 func TestCldClearsDecimal(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = 0xff
 
 	// $0000 cld
-	cpu.Memory.Write(0x0000, 0xd8)
+	cpu.write(0x0000, 0xd8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -759,11 +759,11 @@ func TestCldClearsDecimal(t *testing.T) {
 }
 
 func TestCliClearsInterrupt(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = 0xff
 
 	// $0000 clc
-	cpu.Memory.Write(0x0000, 0x58)
+	cpu.write(0x0000, 0x58)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -775,11 +775,11 @@ func TestCliClearsInterrupt(t *testing.T) {
 }
 
 func TestClvClearsOverflow(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = 0xff
 
 	// $0000 clv
-	cpu.Memory.Write(0x0000, 0xb8)
+	cpu.write(0x0000, 0xb8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -791,12 +791,12 @@ func TestClvClearsOverflow(t *testing.T) {
 }
 
 func TestCmpAbsoluteSetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 cmp $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xcd, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xcd, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -805,16 +805,16 @@ func TestCmpAbsoluteSetsCarryAndZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCmpAbsoluteSetsCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x02
 
 	// $0000 cmp $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xcd, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xcd, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -823,16 +823,16 @@ func TestCmpAbsoluteSetsCarry(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCmpAbsoluteSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 
 	// $0000 cmp $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xcd, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xcd, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -841,16 +841,16 @@ func TestCmpAbsoluteSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCpxAbsoluteSetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x01
 
 	// $0000 cpx $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xec, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xec, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -859,16 +859,16 @@ func TestCpxAbsoluteSetsCarryAndZero(t *testing.T) {
 	assert.Equal(t, uint8(0x01), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCpxAbsoluteSetsCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x02
 
 	// $0000 cpx $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xec, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xec, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -877,16 +877,16 @@ func TestCpxAbsoluteSetsCarry(t *testing.T) {
 	assert.Equal(t, uint8(0x02), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCpxAbsoluteSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x00
 
 	// $0000 cpx $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xec, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xec, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -895,16 +895,16 @@ func TestCpxAbsoluteSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCpyAbsoluteSetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x01
 
 	// $0000 cpy $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xcc, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xcc, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -913,16 +913,16 @@ func TestCpyAbsoluteSetsCarryAndZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x01), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCpyAbsoluteSetsCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x02
 
 	// $0000 cpy $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xcc, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xcc, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -931,16 +931,16 @@ func TestCpyAbsoluteSetsCarry(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x02), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestCpyAbsoluteSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x00
 
 	// $0000 cpy $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xcc, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xcc, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -949,15 +949,15 @@ func TestCpyAbsoluteSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestDecAbsoluteDecrementsMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 dec $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xce, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x08)
+	cpu.writeSlice(0x0000, []uint8{0xce, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x08)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -966,15 +966,15 @@ func TestDecAbsoluteDecrementsMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x07), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x07), cpu.read(0xabcd))
 }
 
 func TestDecAbsoluteDecrementsMemSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 dec $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xce, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xce, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -983,15 +983,15 @@ func TestDecAbsoluteDecrementsMemSetsZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x00), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x00), cpu.read(0xabcd))
 }
 
 func TestDecAbsoluteDecrementsMemSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 dec $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xce, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xce, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1000,15 +1000,15 @@ func TestDecAbsoluteDecrementsMemSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0xff), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0xff), cpu.read(0xabcd))
 }
 
 func TestDexDecrementsX(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x08
 
 	// $0000 dex
-	cpu.Memory.Write(0x0000, 0xca)
+	cpu.write(0x0000, 0xca)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1020,11 +1020,11 @@ func TestDexDecrementsX(t *testing.T) {
 }
 
 func TestDexDecrementsXSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x01
 
 	// $0000 dex
-	cpu.Memory.Write(0x0000, 0xca)
+	cpu.write(0x0000, 0xca)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1036,11 +1036,11 @@ func TestDexDecrementsXSetsZero(t *testing.T) {
 }
 
 func TestDexDecrementsXSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x00
 
 	// $0000 dex
-	cpu.Memory.Write(0x0000, 0xca)
+	cpu.write(0x0000, 0xca)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1052,11 +1052,11 @@ func TestDexDecrementsXSetsNegative(t *testing.T) {
 }
 
 func TestDeyDecrementsY(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x08
 
 	// $0000 dey
-	cpu.Memory.Write(0x0000, 0x88)
+	cpu.write(0x0000, 0x88)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1068,11 +1068,11 @@ func TestDeyDecrementsY(t *testing.T) {
 }
 
 func TestDeyDecrementsYSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x01
 
 	// $0000 dey
-	cpu.Memory.Write(0x0000, 0x88)
+	cpu.write(0x0000, 0x88)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1084,11 +1084,11 @@ func TestDeyDecrementsYSetsZero(t *testing.T) {
 }
 
 func TestDeyDecrementsYSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x00
 
 	// $0000 dey
-	cpu.Memory.Write(0x0000, 0x88)
+	cpu.write(0x0000, 0x88)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1100,12 +1100,12 @@ func TestDeyDecrementsYSetsNegative(t *testing.T) {
 }
 
 func TestEorAbsoluteXorWithMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x05
 
 	// $0000 eor $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x4d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x02)
+	cpu.writeSlice(0x0000, []uint8{0x4d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x02)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1114,16 +1114,16 @@ func TestEorAbsoluteXorWithMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x02), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x02), cpu.read(0xabcd))
 }
 
 func TestEorAbsoluteXorWithMemSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xff
 
 	// $0000 eor $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x4d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0xff)
+	cpu.writeSlice(0x0000, []uint8{0x4d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0xff)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1132,16 +1132,16 @@ func TestEorAbsoluteXorWithMemSetsZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0xff), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0xff), cpu.read(0xabcd))
 }
 
 func TestEorAbsoluteXorWithMemSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 eor $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x4d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0x4d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1150,15 +1150,15 @@ func TestEorAbsoluteXorWithMemSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x80), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x80), cpu.read(0xabcd))
 }
 
 func TestIncAbsoluteIncrementsMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 inc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xee, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x08)
+	cpu.writeSlice(0x0000, []uint8{0xee, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x08)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1167,15 +1167,15 @@ func TestIncAbsoluteIncrementsMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x09), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x09), cpu.read(0xabcd))
 }
 
 func TestIncAbsoluteIncrementsMemSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 inc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xee, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0xff)
+	cpu.writeSlice(0x0000, []uint8{0xee, 0xcd, 0xab})
+	cpu.write(0xabcd, 0xff)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1184,15 +1184,15 @@ func TestIncAbsoluteIncrementsMemSetsZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x00), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x00), cpu.read(0xabcd))
 }
 
 func TestIncAbsoluteIncrementsMemSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 inc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xee, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x7f)
+	cpu.writeSlice(0x0000, []uint8{0xee, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x7f)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1201,15 +1201,15 @@ func TestIncAbsoluteIncrementsMemSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x80), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x80), cpu.read(0xabcd))
 }
 
 func TestInxIncrementsX(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x08
 
 	// $0000 inx
-	cpu.Memory.Write(0x0000, 0xe8)
+	cpu.write(0x0000, 0xe8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1221,11 +1221,11 @@ func TestInxIncrementsX(t *testing.T) {
 }
 
 func TestInxIncrementsXSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0xff
 
 	// $0000 inx
-	cpu.Memory.Write(0x0000, 0xe8)
+	cpu.write(0x0000, 0xe8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1237,11 +1237,11 @@ func TestInxIncrementsXSetsZero(t *testing.T) {
 }
 
 func TestInxIncrementsXSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x7f
 
 	// $0000 inx
-	cpu.Memory.Write(0x0000, 0xe8)
+	cpu.write(0x0000, 0xe8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1253,11 +1253,11 @@ func TestInxIncrementsXSetsNegative(t *testing.T) {
 }
 
 func TestInyIncrementsY(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x08
 
 	// $0000 iny
-	cpu.Memory.Write(0x0000, 0xc8)
+	cpu.write(0x0000, 0xc8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1269,11 +1269,11 @@ func TestInyIncrementsY(t *testing.T) {
 }
 
 func TestInyIncrementsYSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0xff
 
 	// $0000 iny
-	cpu.Memory.Write(0x0000, 0xc8)
+	cpu.write(0x0000, 0xc8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1285,11 +1285,11 @@ func TestInyIncrementsYSetsZero(t *testing.T) {
 }
 
 func TestInyIncrementsYSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x7f
 
 	// $0000 iny
-	cpu.Memory.Write(0x0000, 0xc8)
+	cpu.write(0x0000, 0xc8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1301,10 +1301,10 @@ func TestInyIncrementsYSetsNegative(t *testing.T) {
 }
 
 func TestJmpAbsoluteModifyPC(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 JMP $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x4c, 0xcd, 0xab})
+	cpu.writeSlice(0x0000, []uint8{0x4c, 0xcd, 0xab})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xabcd), cpu.PC)
@@ -1316,11 +1316,11 @@ func TestJmpAbsoluteModifyPC(t *testing.T) {
 }
 
 func TestJmpIndirectModifyPC(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 JMP ($abcd)
-	cpu.Memory.writeSlice(0x0000, []byte{0x6c, 0x00, 0x02})
-	cpu.Memory.writeSlice(0x0200, []byte{0xcd, 0xab})
+	cpu.writeSlice(0x0000, []uint8{0x6c, 0x00, 0x02})
+	cpu.writeSlice(0x0200, []uint8{0xcd, 0xab})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xabcd), cpu.PC)
@@ -1332,12 +1332,12 @@ func TestJmpIndirectModifyPC(t *testing.T) {
 }
 
 func TestJsrPushesAndUpdatePC(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0xc010
 	cpu.SP = 0xfd
 
 	// $c010 JSR $ffd2
-	cpu.Memory.writeSlice(0xc010, []byte{0x20, 0xd2, 0xff})
+	cpu.writeSlice(0xc010, []uint8{0x20, 0xd2, 0xff})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xffd2), cpu.PC)
@@ -1346,17 +1346,17 @@ func TestJsrPushesAndUpdatePC(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0xfb), cpu.SP)
-	assert.Equal(t, uint8(0xc0), cpu.Memory.Read(0x01fd))
-	assert.Equal(t, uint8(0x12), cpu.Memory.Read(0x01fc))
+	assert.Equal(t, uint8(0xc0), cpu.read(0x01fd))
+	assert.Equal(t, uint8(0x12), cpu.read(0x01fc))
 }
 
 func TestLdaAbsoluteLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 
 	// $0000 LDA $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xad, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xad, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1368,12 +1368,12 @@ func TestLdaAbsoluteLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaAbsoluteLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xff
 
 	// $0000 LDA $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xad, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xad, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1385,12 +1385,12 @@ func TestLdaAbsoluteLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaZPLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 
 	// $0000 LDA $0010
-	cpu.Memory.writeSlice(0x0000, []byte{0xa5, 0x10})
-	cpu.Memory.Write(0x0010, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xa5, 0x10})
+	cpu.write(0x0010, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1402,12 +1402,12 @@ func TestLdaZPLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaZPLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xFF
 
 	// $0000 LDA $0010
-	cpu.Memory.writeSlice(0x0000, []byte{0xa5, 0x10})
-	cpu.Memory.Write(0x0010, 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xa5, 0x10})
+	cpu.write(0x0010, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1419,11 +1419,11 @@ func TestLdaZPLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaImmediateLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 
 	// $0000 LDA #$80
-	cpu.Memory.writeSlice(0x0000, []byte{0xa9, 0x80})
+	cpu.writeSlice(0x0000, []uint8{0xa9, 0x80})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1435,11 +1435,11 @@ func TestLdaImmediateLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaImmediateLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xFF
 
 	// $0000 LDA #$00
-	cpu.Memory.writeSlice(0x0000, []byte{0xA9, 0x00})
+	cpu.writeSlice(0x0000, []uint8{0xA9, 0x00})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1451,13 +1451,13 @@ func TestLdaImmediateLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaAbsXIndexedLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.X = 0x03
 
 	// $0000 LDA $abcd,X
-	cpu.Memory.writeSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
-	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.X), 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xbd, 0xcd, 0xab})
+	cpu.write(uint16(0xabcd)+uint16(cpu.X), 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1469,13 +1469,13 @@ func TestLdaAbsXIndexedLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaAbsXIndexedLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xFF
 	cpu.X = 0x03
 
 	// $0000 LDA $abcd,X
-	cpu.Memory.writeSlice(0x0000, []byte{0xbd, 0xcd, 0xab})
-	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.X), 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xbd, 0xcd, 0xab})
+	cpu.write(uint16(0xabcd)+uint16(cpu.X), 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1487,13 +1487,13 @@ func TestLdaAbsXIndexedLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaAbsYIndexedLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.Y = 0x03
 
 	// $0000 LDA $abcd,Y
-	cpu.Memory.writeSlice(0x0000, []byte{0xb9, 0xcd, 0xab})
-	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xb9, 0xcd, 0xab})
+	cpu.write(uint16(0xabcd)+uint16(cpu.Y), 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1505,13 +1505,13 @@ func TestLdaAbsYIndexedLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaAbsYIndexedLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xff
 	cpu.Y = 0x03
 
 	// $0000 LDA $abcd,Y
-	cpu.Memory.writeSlice(0x0000, []byte{0xb9, 0xcd, 0xab})
-	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xb9, 0xcd, 0xab})
+	cpu.write(uint16(0xabcd)+uint16(cpu.Y), 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1523,15 +1523,15 @@ func TestLdaAbsYIndexedLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaIndIndexedXLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.X = 0x03
 
 	// $0000 LDA ($0010,X)
 	// $0013 vector to $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xa1, 0x10})
-	cpu.Memory.writeSlice(0x0013, []byte{0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xa1, 0x10})
+	cpu.writeSlice(0x0013, []uint8{0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1543,15 +1543,15 @@ func TestLdaIndIndexedXLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaIndIndexedXLoadsASetsNFlagIgnoreCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.X = 0xe9
 
 	// $0000 LDA ($0051,X)
 	// $003a vector to $3104
-	cpu.Memory.writeSlice(0x0000, []byte{0xa1, 0x51})
-	cpu.Memory.writeSlice(0x003a, []byte{0x04, 0x31})
-	cpu.Memory.Write(0x3104, 0x81)
+	cpu.writeSlice(0x0000, []uint8{0xa1, 0x51})
+	cpu.writeSlice(0x003a, []uint8{0x04, 0x31})
+	cpu.write(0x3104, 0x81)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1563,15 +1563,15 @@ func TestLdaIndIndexedXLoadsASetsNFlagIgnoreCarry(t *testing.T) {
 }
 
 func TestLdaIndIndexedXLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.X = 0x03
 
 	// $0000 LDA ($0010,X)
 	// $0013 vector to $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xa1, 0x10})
-	cpu.Memory.writeSlice(0x0013, []byte{0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xa1, 0x10})
+	cpu.writeSlice(0x0013, []uint8{0xcd, 0xab})
+	cpu.write(0xabcd, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1583,15 +1583,15 @@ func TestLdaIndIndexedXLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaIndexedIndYLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.Y = 0x03
 
 	// $0000 LDA ($0010),Y
 	// $0010 Vector to $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xb1, 0x10})
-	cpu.Memory.writeSlice(0x0010, []byte{0xcd, 0xab})
-	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xb1, 0x10})
+	cpu.writeSlice(0x0010, []uint8{0xcd, 0xab})
+	cpu.write(uint16(0xabcd)+uint16(cpu.Y), 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1603,14 +1603,14 @@ func TestLdaIndexedIndYLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaIndexedIndYLoadsASetsNFlagWithCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.Y = 0xe9
 
 	// LDA ($a4),Y
-	cpu.Memory.writeSlice(0x0000, []byte{0xb1, 0xa4})
-	cpu.Memory.writeSlice(0x00a4, []byte{0x51, 0x3f})
-	cpu.Memory.Write(0x403a, 0xbb)
+	cpu.writeSlice(0x0000, []uint8{0xb1, 0xa4})
+	cpu.writeSlice(0x00a4, []uint8{0x51, 0x3f})
+	cpu.write(0x403a, 0xbb)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1622,15 +1622,15 @@ func TestLdaIndexedIndYLoadsASetsNFlagWithCarry(t *testing.T) {
 }
 
 func TestLdaIndexedIndYLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.Y = 0x03
 
 	// $0000 LDA ($0010),Y
 	// $0010 Vector to $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xb1, 0x10})
-	cpu.Memory.writeSlice(0x0010, []byte{0xcd, 0xab})
-	cpu.Memory.Write(uint16(0xabcd)+uint16(cpu.Y), 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xb1, 0x10})
+	cpu.writeSlice(0x0010, []uint8{0xcd, 0xab})
+	cpu.write(uint16(0xabcd)+uint16(cpu.Y), 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1642,13 +1642,13 @@ func TestLdaIndexedIndYLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaZpXIndexedLoadsASetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.X = 0x03
 
 	// $0000 LDA $10,X
-	cpu.Memory.writeSlice(0x0000, []byte{0xb5, 0x10})
-	cpu.Memory.Write(uint16(0x0010)+uint16(cpu.X), 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xb5, 0x10})
+	cpu.write(uint16(0x0010)+uint16(cpu.X), 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1660,13 +1660,13 @@ func TestLdaZpXIndexedLoadsASetsNFlag(t *testing.T) {
 }
 
 func TestLdaZpXIndexedLoadsASetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xff
 	cpu.X = 0x03
 
 	// $0000 LDA $10,X
-	cpu.Memory.writeSlice(0x0000, []byte{0xb5, 0x10})
-	cpu.Memory.Write(uint16(0x0010)+uint16(cpu.X), 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xb5, 0x10})
+	cpu.write(uint16(0x0010)+uint16(cpu.X), 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1678,13 +1678,13 @@ func TestLdaZpXIndexedLoadsASetsZFlag(t *testing.T) {
 }
 
 func TestLdaZpXIndexedWrapAroundZp(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.X = 0xff
 
 	// $0000 LDA $40,X
-	cpu.Memory.writeSlice(0x0000, []byte{0xb5, 0x40})
-	cpu.Memory.Write(uint16(0x003f), 0x42)
+	cpu.writeSlice(0x0000, []uint8{0xb5, 0x40})
+	cpu.write(uint16(0x003f), 0x42)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0002), cpu.PC)
@@ -1696,12 +1696,12 @@ func TestLdaZpXIndexedWrapAroundZp(t *testing.T) {
 }
 
 func TestLdxAbsoluteLoadsXSetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x00
 
 	// $0000 LDX $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xae, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xae, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1713,12 +1713,12 @@ func TestLdxAbsoluteLoadsXSetsNFlag(t *testing.T) {
 }
 
 func TestLdxAbsoluteLoadsXSetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0xff
 
 	// $0000 LDX $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xae, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xae, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1730,12 +1730,12 @@ func TestLdxAbsoluteLoadsXSetsZFlag(t *testing.T) {
 }
 
 func TestLdyAbsoluteLoadsYSetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x00
 
 	// $0000 LDY $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xac, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0xac, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1747,12 +1747,12 @@ func TestLdyAbsoluteLoadsYSetsNFlag(t *testing.T) {
 }
 
 func TestLdyAbsoluteLoadsYSetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0xff
 
 	// $0000 LDY $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xac, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x00)
+	cpu.writeSlice(0x0000, []uint8{0xac, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1764,11 +1764,11 @@ func TestLdyAbsoluteLoadsYSetsZFlag(t *testing.T) {
 }
 
 func TestLsrAccumulatorShiftsA(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x02
 
 	// $0000 lsr a
-	cpu.Memory.Write(0x0000, 0x4a)
+	cpu.write(0x0000, 0x4a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1780,11 +1780,11 @@ func TestLsrAccumulatorShiftsA(t *testing.T) {
 }
 
 func TestLsrAccumulatorShiftsASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 lsr a
-	cpu.Memory.Write(0x0000, 0x4a)
+	cpu.write(0x0000, 0x4a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1796,12 +1796,12 @@ func TestLsrAccumulatorShiftsASetsCarryAndZero(t *testing.T) {
 }
 
 func TestLsrAccumulatorShiftsAClearNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0xaa
 	cpu.PS = flagNegative
 
 	// $0000 lsr a
-	cpu.Memory.Write(0x0000, 0x4a)
+	cpu.write(0x0000, 0x4a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1813,11 +1813,11 @@ func TestLsrAccumulatorShiftsAClearNegative(t *testing.T) {
 }
 
 func TestLsrAbsoluteShiftsMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 lsr $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x4e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x02)
+	cpu.writeSlice(0x0000, []uint8{0x4e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x02)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1826,15 +1826,15 @@ func TestLsrAbsoluteShiftsMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestLsrAbsoluteShiftsASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 lsr $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x4e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x4e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1843,16 +1843,16 @@ func TestLsrAbsoluteShiftsASetsCarryAndZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x00), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x00), cpu.read(0xabcd))
 }
 
 func TestLsrAbsoluteShiftsAClearNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagNegative
 
 	// $0000 lsr $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x4e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0xaa)
+	cpu.writeSlice(0x0000, []uint8{0x4e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0xaa)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1861,14 +1861,14 @@ func TestLsrAbsoluteShiftsAClearNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x55), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x55), cpu.read(0xabcd))
 }
 
 func TestNopDoesNothing(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 NOP
-	cpu.Memory.Write(0x0000, 0xea)
+	cpu.write(0x0000, 0xea)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1880,12 +1880,12 @@ func TestNopDoesNothing(t *testing.T) {
 }
 
 func TestOraAbsoluteOrWithMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 ora $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x0d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x02)
+	cpu.writeSlice(0x0000, []uint8{0x0d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x02)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1894,16 +1894,16 @@ func TestOraAbsoluteOrWithMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x02), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x02), cpu.read(0xabcd))
 }
 
 func TestOraAbsoluteOrWithMemSetsZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 
 	// $0000 ora $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x0d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x00)
+	cpu.writeSlice(0x0000, []uint8{0x0d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1912,16 +1912,16 @@ func TestOraAbsoluteOrWithMemSetsZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x00), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x00), cpu.read(0xabcd))
 }
 
 func TestOraAbsoluteOrWithMemSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x55
 
 	// $0000 ora $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x0d, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0xaa)
+	cpu.writeSlice(0x0000, []uint8{0x0d, 0xcd, 0xab})
+	cpu.write(0xabcd, 0xaa)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -1930,16 +1930,16 @@ func TestOraAbsoluteOrWithMemSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0xaa), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0xaa), cpu.read(0xabcd))
 }
 
 func TestPhaPushesAAndUpdatesSP(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xfd
 	cpu.A = 0xab
 
 	// $0000 PHA
-	cpu.Memory.Write(0x0000, 0x48)
+	cpu.write(0x0000, 0x48)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1948,16 +1948,16 @@ func TestPhaPushesAAndUpdatesSP(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0xfc), cpu.SP)
-	assert.Equal(t, uint8(0xab), cpu.Memory.Read(0x01fd))
+	assert.Equal(t, uint8(0xab), cpu.read(0x01fd))
 }
 
 func TestPhaPushesAAndUpdatesSPUnderflow(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0x00
 	cpu.A = 0xab
 
 	// $0000 PHA
-	cpu.Memory.Write(0x0000, 0x48)
+	cpu.write(0x0000, 0x48)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1966,16 +1966,16 @@ func TestPhaPushesAAndUpdatesSPUnderflow(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0xff), cpu.SP)
-	assert.Equal(t, uint8(0xab), cpu.Memory.Read(0x0100))
+	assert.Equal(t, uint8(0xab), cpu.read(0x0100))
 }
 
 func TestPhpPushesPAndUpdatesSP(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xfd
 	cpu.PS = Flags(0x55)
 
 	// $0000 PHP
-	cpu.Memory.Write(0x0000, 0x08)
+	cpu.write(0x0000, 0x08)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -1984,17 +1984,17 @@ func TestPhpPushesPAndUpdatesSP(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0xfc), cpu.SP)
-	assert.Equal(t, uint8(0x55), cpu.Memory.Read(0x01fd))
+	assert.Equal(t, uint8(0x55), cpu.read(0x01fd))
 }
 
 func TestPlaPullsIntoAAndUpdatesSP(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xfd
 	cpu.A = 0xff
 
 	// $0000 PLA
-	cpu.Memory.Write(0x0000, 0x68)
-	cpu.Memory.Write(0x01fe, 0x3a)
+	cpu.write(0x0000, 0x68)
+	cpu.write(0x01fe, 0x3a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2006,13 +2006,13 @@ func TestPlaPullsIntoAAndUpdatesSP(t *testing.T) {
 }
 
 func TestPlaPullsIntoAAndUpdatesSPOverflow(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xff
 	cpu.A = 0xff
 
 	// $0000 PLA
-	cpu.Memory.Write(0x0000, 0x68)
-	cpu.Memory.Write(0x0100, 0x3a)
+	cpu.write(0x0000, 0x68)
+	cpu.write(0x0100, 0x3a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2024,13 +2024,13 @@ func TestPlaPullsIntoAAndUpdatesSPOverflow(t *testing.T) {
 }
 
 func TestPlaPullsIntoAAndSetsZFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xfd
 	cpu.A = 0xff
 
 	// $0000 PLA
-	cpu.Memory.Write(0x0000, 0x68)
-	cpu.Memory.Write(0x01fe, 0x00)
+	cpu.write(0x0000, 0x68)
+	cpu.write(0x01fe, 0x00)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2042,13 +2042,13 @@ func TestPlaPullsIntoAAndSetsZFlag(t *testing.T) {
 }
 
 func TestPlaPullsIntoAAndSetsNFlag(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xfd
 	cpu.A = 0xff
 
 	// $0000 PLA
-	cpu.Memory.Write(0x0000, 0x68)
-	cpu.Memory.Write(0x01fe, 0x80)
+	cpu.write(0x0000, 0x68)
+	cpu.write(0x01fe, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2060,13 +2060,13 @@ func TestPlaPullsIntoAAndSetsNFlag(t *testing.T) {
 }
 
 func TestPlpPullsIntoPAndUpdatesSP(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xfd
 	cpu.PS = 0xff
 
 	// $0000 PLP
-	cpu.Memory.Write(0x0000, 0x28)
-	cpu.Memory.Write(0x01fe, 0xaa)
+	cpu.write(0x0000, 0x28)
+	cpu.write(0x01fe, 0xaa)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2078,11 +2078,11 @@ func TestPlpPullsIntoPAndUpdatesSP(t *testing.T) {
 }
 
 func TestRolAccumulatorRotateA(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 rol a
-	cpu.Memory.Write(0x0000, 0x2a)
+	cpu.write(0x0000, 0x2a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2094,12 +2094,12 @@ func TestRolAccumulatorRotateA(t *testing.T) {
 }
 
 func TestRolAccumulatorRotateAClearCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 	cpu.PS = flagCarry
 
 	// $0000 rol a
-	cpu.Memory.Write(0x0000, 0x2a)
+	cpu.write(0x0000, 0x2a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2111,11 +2111,11 @@ func TestRolAccumulatorRotateAClearCarry(t *testing.T) {
 }
 
 func TestRolAccumulatorRotateASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x80
 
 	// $0000 rol a
-	cpu.Memory.Write(0x0000, 0x2a)
+	cpu.write(0x0000, 0x2a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2127,11 +2127,11 @@ func TestRolAccumulatorRotateASetsCarryAndZero(t *testing.T) {
 }
 
 func TestRolAccumulatorRotateASetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x55
 
 	// $0000 rol a
-	cpu.Memory.Write(0x0000, 0x2a)
+	cpu.write(0x0000, 0x2a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2143,11 +2143,11 @@ func TestRolAccumulatorRotateASetsNegative(t *testing.T) {
 }
 
 func TestRolAbsoluteRotateMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 rol $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x2e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2156,16 +2156,16 @@ func TestRolAbsoluteRotateMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x02), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x02), cpu.read(0xabcd))
 }
 
 func TestRolAbsoluteRotateMemClearCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagCarry
 
 	// $0000 rol $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x2e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2174,15 +2174,15 @@ func TestRolAbsoluteRotateMemClearCarry(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x03), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x03), cpu.read(0xabcd))
 }
 
 func TestRolAbsoluteRotateASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 rol $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x80)
+	cpu.writeSlice(0x0000, []uint8{0x2e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x80)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2191,15 +2191,15 @@ func TestRolAbsoluteRotateASetsCarryAndZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x00), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x00), cpu.read(0xabcd))
 }
 
 func TestRolAbsoluteRotateMemSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 rol $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x2e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x55)
+	cpu.writeSlice(0x0000, []uint8{0x2e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x55)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2208,15 +2208,15 @@ func TestRolAbsoluteRotateMemSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0xaa), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0xaa), cpu.read(0xabcd))
 }
 
 func TestRorAccumulatorRotateA(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x02
 
 	// $0000 ror a
-	cpu.Memory.Write(0x0000, 0x6a)
+	cpu.write(0x0000, 0x6a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2228,12 +2228,12 @@ func TestRorAccumulatorRotateA(t *testing.T) {
 }
 
 func TestRorAccumulatorRotateAClearCarrySetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x02
 	cpu.PS = flagCarry
 
 	// $0000 ror a
-	cpu.Memory.Write(0x0000, 0x6a)
+	cpu.write(0x0000, 0x6a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2245,11 +2245,11 @@ func TestRorAccumulatorRotateAClearCarrySetsNegative(t *testing.T) {
 }
 
 func TestRorAccumulatorRotateASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x01
 
 	// $0000 ror a
-	cpu.Memory.Write(0x0000, 0x6a)
+	cpu.write(0x0000, 0x6a)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2261,11 +2261,11 @@ func TestRorAccumulatorRotateASetsCarryAndZero(t *testing.T) {
 }
 
 func TestRorAbsoluteRotateMem(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 ror $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x02)
+	cpu.writeSlice(0x0000, []uint8{0x6e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x02)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2274,16 +2274,16 @@ func TestRorAbsoluteRotateMem(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestRorAbsoluteRotateMemClearCarrySetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PS = flagCarry
 
 	// $0000 ror $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x02)
+	cpu.writeSlice(0x0000, []uint8{0x6e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x02)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2292,15 +2292,15 @@ func TestRorAbsoluteRotateMemClearCarrySetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x81), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x81), cpu.read(0xabcd))
 }
 
 func TestRorAbsoluteRotateASetsCarryAndZero(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 ror $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x6e, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0x6e, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2309,16 +2309,16 @@ func TestRorAbsoluteRotateASetsCarryAndZero(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x00), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x00), cpu.read(0xabcd))
 }
 
 func TestRtiPullsPCAndPSAndUpdatePC(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xf0
 
 	// $0000 RTI
-	cpu.Memory.Write(0x0000, 0x40)
-	cpu.Memory.writeSlice(0x01f1, []byte{0x01, 0x03, 0xc0})
+	cpu.write(0x0000, 0x40)
+	cpu.writeSlice(0x01f1, []uint8{0x01, 0x03, 0xc0})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xc003), cpu.PC)
@@ -2330,12 +2330,12 @@ func TestRtiPullsPCAndPSAndUpdatePC(t *testing.T) {
 }
 
 func TestRtsPullsAndUpdatePC(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.SP = 0xf0
 
 	// $0000 RTS
-	cpu.Memory.Write(0x0000, 0x60)
-	cpu.Memory.writeSlice(0x01f1, []byte{0x10, 0xc0})
+	cpu.write(0x0000, 0x60)
+	cpu.writeSlice(0x01f1, []uint8{0x10, 0xc0})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xc011), cpu.PC)
@@ -2347,13 +2347,13 @@ func TestRtsPullsAndUpdatePC(t *testing.T) {
 }
 
 func TestRtsPullsAndUpdatePCWrapAround(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.PC = 0xf000
 	cpu.SP = 0xf0
 
 	// $f000 RTS
-	cpu.Memory.Write(0xf000, 0x60)
-	cpu.Memory.writeSlice(0x01f1, []byte{0xff, 0xff})
+	cpu.write(0xf000, 0x60)
+	cpu.writeSlice(0x01f1, []uint8{0xff, 0xff})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0000), cpu.PC)
@@ -2365,13 +2365,13 @@ func TestRtsPullsAndUpdatePCWrapAround(t *testing.T) {
 }
 
 func TestSbcAbsoluteClearZeroSetsNegative(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x00
 	cpu.PS = flagZero
 
 	// $0000 sbc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xed, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xed, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2380,17 +2380,17 @@ func TestSbcAbsoluteClearZeroSetsNegative(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestSbcAbsoluteSubMemWithCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x02
 	cpu.PS = flagCarry
 
 	// $0000 sbc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xed, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x01)
+	cpu.writeSlice(0x0000, []uint8{0xed, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x01)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2399,17 +2399,17 @@ func TestSbcAbsoluteSubMemWithCarry(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x01), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x01), cpu.read(0xabcd))
 }
 
 func TestSbcAbsoluteSubMemSetsOverflowNegSubPos(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x81
 	cpu.PS = flagNegative
 
 	// $0000 sbc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xed, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x7f)
+	cpu.writeSlice(0x0000, []uint8{0xed, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x7f)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2418,16 +2418,16 @@ func TestSbcAbsoluteSubMemSetsOverflowNegSubPos(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x7f), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x7f), cpu.read(0xabcd))
 }
 
 func TestSbcAbsoluteSubMemSetsOverflowPosSubNeg(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x7f
 
 	// $0000 sbc $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0xed, 0xcd, 0xab})
-	cpu.Memory.Write(0xabcd, 0x81)
+	cpu.writeSlice(0x0000, []uint8{0xed, 0xcd, 0xab})
+	cpu.write(0xabcd, 0x81)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2436,14 +2436,14 @@ func TestSbcAbsoluteSubMemSetsOverflowPosSubNeg(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x81), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x81), cpu.read(0xabcd))
 }
 
 func TestSecSetsCarry(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 sec
-	cpu.Memory.Write(0x0000, 0x38)
+	cpu.write(0x0000, 0x38)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2455,10 +2455,10 @@ func TestSecSetsCarry(t *testing.T) {
 }
 
 func TestSedSetsDecimal(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 sed
-	cpu.Memory.Write(0x0000, 0xf8)
+	cpu.write(0x0000, 0xf8)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2470,10 +2470,10 @@ func TestSedSetsDecimal(t *testing.T) {
 }
 
 func TestSeiSetsInterrupt(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 
 	// $0000 sei
-	cpu.Memory.Write(0x0000, 0x78)
+	cpu.write(0x0000, 0x78)
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
@@ -2485,11 +2485,11 @@ func TestSeiSetsInterrupt(t *testing.T) {
 }
 
 func TestStaAbsoluteStoresA(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.A = 0x55
 
 	// $0000 STA $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x8d, 0xcd, 0xab})
+	cpu.writeSlice(0x0000, []uint8{0x8d, 0xcd, 0xab})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2498,15 +2498,15 @@ func TestStaAbsoluteStoresA(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x55), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x55), cpu.read(0xabcd))
 }
 
 func TestStxAbsoluteStoresX(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.X = 0x55
 
 	// $0000 STX $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x8e, 0xcd, 0xab})
+	cpu.writeSlice(0x0000, []uint8{0x8e, 0xcd, 0xab})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2515,15 +2515,15 @@ func TestStxAbsoluteStoresX(t *testing.T) {
 	assert.Equal(t, uint8(0x55), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x55), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x55), cpu.read(0xabcd))
 }
 
 func TestStyAbsoluteStoresY(t *testing.T) {
-	cpu := New()
+	cpu := NewWithRAM()
 	cpu.Y = 0x55
 
 	// $0000 STY $abcd
-	cpu.Memory.writeSlice(0x0000, []byte{0x8c, 0xcd, 0xab})
+	cpu.writeSlice(0x0000, []uint8{0x8c, 0xcd, 0xab})
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0003), cpu.PC)
@@ -2532,5 +2532,5 @@ func TestStyAbsoluteStoresY(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x55), cpu.Y)
 	assert.Equal(t, uint8(0x00), cpu.SP)
-	assert.Equal(t, uint8(0x55), cpu.Memory.Read(0xabcd))
+	assert.Equal(t, uint8(0x55), cpu.read(0xabcd))
 }

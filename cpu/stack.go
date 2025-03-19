@@ -1,13 +1,13 @@
 package cpu
 
 func (cpu *CPU) push(val uint8) {
-	cpu.Memory.Write(stackBase|uint16(cpu.SP), val)
+	cpu.write(stackBase|uint16(cpu.SP), val)
 	cpu.SP -= 1
 }
 
 func (cpu *CPU) pop() uint8 {
 	cpu.SP += 1
-	val := cpu.Memory.Read(stackBase | uint16(cpu.SP))
+	val := cpu.read(stackBase | uint16(cpu.SP))
 
 	return val
 }

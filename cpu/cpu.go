@@ -8,8 +8,6 @@ const (
 	magic       = 0xee
 )
 
-// The processor is little endian and expects
-// addresses to be stored in memory least significant byte first.
 type CPU struct {
 	PC uint16
 	SP uint8
@@ -18,12 +16,18 @@ type CPU struct {
 	Y  uint8
 	PS Flags
 
-	Memory     Memory
-	TotalTicks uint64
+	memory     Memory
+	totalTicks uint64
 }
 
-func New() *CPU {
-	return &CPU{}
+func New(mem Memory) *CPU {
+	return &CPU{
+		memory: mem,
+	}
+}
+
+func NewWithRAM() *CPU {
+	return New(NewRAM())
 }
 
 func (cpu *CPU) Reset() {
@@ -45,7 +49,7 @@ func (cpu *CPU) nextPC() uint16 {
 }
 
 func (cpu *CPU) readPC() uint8 {
-	return cpu.Memory.Read(cpu.nextPC())
+	return cpu.read(cpu.nextPC())
 }
 
 func (cpu *CPU) readPCWord() uint16 {
@@ -56,14 +60,14 @@ func (cpu *CPU) readPCWord() uint16 {
 }
 
 func (cpu *CPU) readWord(addr uint16) uint16 {
-	lo := cpu.Memory.Read(addr)
-	hi := cpu.Memory.Read(addr + 1)
+	lo := cpu.read(addr)
+	hi := cpu.read(addr + 1)
 
 	return word(lo, hi)
 }
 
 func (cpu *CPU) readWordWithoutPageCross(addr uint16) uint16 {
-	lo := cpu.Memory.Read(addr)
+	lo := cpu.read(addr)
 
 	if addr&0x00ff == 0x00ff {
 		addr = addr & 0xff00
@@ -71,7 +75,7 @@ func (cpu *CPU) readWordWithoutPageCross(addr uint16) uint16 {
 		addr += 1
 	}
 
-	hi := cpu.Memory.Read(addr)
+	hi := cpu.read(addr)
 
 	return word(lo, hi)
 }
@@ -83,55 +87,14 @@ func (cpu *CPU) Step() {
 	operand := cpu.fetchOperand(op.AddressMode)
 	op.Do(cpu, operand)
 
-	cpu.TotalTicks += uint64(op.Ticks)
+	cpu.totalTicks += uint64(op.Ticks)
 	// TODO handle extra page cross ticks
 }
 
 func (cpu *CPU) fetchOperand(am AddressMode) *Operand {
-	switch am {
-	case amImp, amAcc:
-		return &Operand{AddressMode: am}
-	default:
-		return &Operand{
-			Address:     cpu.fetchOperandAddress(am),
-			AddressMode: am,
-		}
-	}
-}
-
-func (cpu *CPU) fetchOperandAddress(am AddressMode) uint16 {
-	switch am {
-	case amImp, amAcc:
-		return 0
-	case amImm:
-		return cpu.nextPC()
-	case amZeP:
-		return uint16(cpu.readPC())
-	case amZeX:
-		addr := cpu.readPC() + cpu.X
-		return uint16(addr)
-	case amZeY:
-		addr := cpu.readPC() + cpu.Y
-		return uint16(addr)
-	case amRel:
-		offset := int8(cpu.readPC())
-		return uint16(int32(cpu.PC) + int32(offset))
-	case amAbs:
-		return cpu.readPCWord()
-	case amAbX:
-		return cpu.readPCWord() + uint16(cpu.X)
-	case amAbY:
-		return cpu.readPCWord() + uint16(cpu.Y)
-	case amInd:
-		return cpu.readWordWithoutPageCross(cpu.readPCWord())
-	case amInX:
-		addr := uint16(cpu.readPC() + cpu.X)
-		return cpu.readWordWithoutPageCross(addr)
-	case amInY:
-		addr := cpu.readWordWithoutPageCross(uint16(cpu.readPC()))
-		return addr + uint16(cpu.Y)
-	default:
-		panic("Unknown address mode")
+	return &Operand{
+		Address:     cpu.fetchOperandAddress(am),
+		AddressMode: am,
 	}
 }
 
@@ -140,14 +103,14 @@ func (cpu *CPU) readOperand(operand *Operand) uint8 {
 		return cpu.A
 	}
 
-	return cpu.Memory.Read(operand.Address)
+	return cpu.read(operand.Address)
 }
 
 func (cpu *CPU) writeOperand(operand *Operand, val uint8) {
 	if operand.AddressMode == amAcc {
 		cpu.A = val
 	} else {
-		cpu.Memory.Write(operand.Address, val)
+		cpu.write(operand.Address, val)
 	}
 }
 

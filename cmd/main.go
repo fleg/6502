@@ -3,11 +3,12 @@ package main
 import "github.com/fleg/6502/cpu"
 
 func main() {
-	cpu := cpu.New()
+	ram := cpu.NewRAM()
+	cpu := cpu.New(ram)
 
-	cpu.Memory.Write(0xfffd, 0x60)
-	cpu.Memory.Write(0xfffc, 0x00)
-	cpu.Memory.Write(0x6000, 0xea)
+	ram.Write(0xfffd, 0x60)
+	ram.Write(0xfffc, 0x00)
+	ram.Write(0x6000, 0xea)
 
 	cpu.Reset()
 

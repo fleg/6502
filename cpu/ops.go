@@ -210,7 +210,7 @@ func sei(cpu *CPU, _ *Operand) {
 }
 
 func dec(cpu *CPU, operand *Operand) {
-	val := cpu.Memory.Read(operand.Address) - 1
+	val := cpu.read(operand.Address) - 1
 	cpu.writeOperand(operand, val)
 
 	cpu.updateZeroFlag(val)
@@ -232,7 +232,7 @@ func dey(cpu *CPU, _ *Operand) {
 }
 
 func inc(cpu *CPU, operand *Operand) {
-	val := cpu.Memory.Read(operand.Address) + 1
+	val := cpu.read(operand.Address) + 1
 	cpu.writeOperand(operand, val)
 
 	cpu.updateZeroFlag(val)

@@ -12,9 +12,9 @@ func TestKlausDormannFunctional(t *testing.T) {
 	bin, err := os.ReadFile("../test_suites/klaus_dormann/bin/6502_functional_test.bin")
 	assert.NoError(t, err)
 
-	cpu := New()
+	cpu := NewWithRAM()
 
-	cpu.Memory.writeSlice(0x000a, bin)
+	cpu.writeSlice(0x000a, bin)
 	cpu.SP = 0xfd
 	cpu.PS = flagInterrupt
 	cpu.PC = 0x0400
@@ -57,9 +57,9 @@ func TestKlausDormannBCD(t *testing.T) {
 	bin, err := os.ReadFile("../test_suites/klaus_dormann/bin/6502_decimal_test.bin")
 	assert.NoError(t, err)
 
-	cpu := New()
+	cpu := NewWithRAM()
 
-	cpu.Memory.writeSlice(0x0200, bin)
+	cpu.writeSlice(0x0200, bin)
 	cpu.SP = 0xfd
 	cpu.PS = flagInterrupt
 	cpu.PC = 0x0200
@@ -72,7 +72,7 @@ func TestKlausDormannBCD(t *testing.T) {
 		}
 	}
 
-	if cpu.Memory.Read(0x000b) == 0x01 {
+	if cpu.read(0x000b) == 0x01 {
 		t.Fail()
 	}
 }

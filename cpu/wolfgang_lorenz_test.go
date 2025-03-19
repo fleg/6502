@@ -48,7 +48,7 @@ func loadBinaries(t *testing.T) map[string][]byte {
 
 func TestWolfgangLorenz(t *testing.T) {
 	binaries := loadBinaries(t)
-	cpu := New()
+	cpu := NewWithRAM()
 	var output bytes.Buffer
 	testName := "start"
 	fail := false
@@ -58,27 +58,27 @@ func TestWolfgangLorenz(t *testing.T) {
 		assert.True(t, ok)
 
 		entryPoint := word(bin[0], bin[1])
-		cpu.Memory.writeSlice(entryPoint, bin[2:])
+		cpu.writeSlice(entryPoint, bin[2:])
 
-		cpu.Memory.Write(0x0002, 0x00)
-		cpu.Memory.Write(0xa002, 0x00)
-		cpu.Memory.Write(0xa003, 0x80)
-		cpu.Memory.Write(0xfffe, 0x48)
-		cpu.Memory.Write(0xffff, 0xff)
-		cpu.Memory.Write(0x01fe, 0xff)
-		cpu.Memory.Write(0x01ff, 0x7f)
+		cpu.write(0x0002, 0x00)
+		cpu.write(0xa002, 0x00)
+		cpu.write(0xa003, 0x80)
+		cpu.write(0xfffe, 0x48)
+		cpu.write(0xffff, 0xff)
+		cpu.write(0x01fe, 0xff)
+		cpu.write(0x01ff, 0x7f)
 
-		cpu.Memory.writeSlice(0xff48, []byte{0x48})
-		cpu.Memory.writeSlice(0xff49, []byte{0x8a})
-		cpu.Memory.writeSlice(0xff4a, []byte{0x48})
-		cpu.Memory.writeSlice(0xff4b, []byte{0x98})
-		cpu.Memory.writeSlice(0xff4c, []byte{0x48})
-		cpu.Memory.writeSlice(0xff4d, []byte{0xba})
-		cpu.Memory.writeSlice(0xff4e, []byte{0xbd, 0x04, 0x01})
-		cpu.Memory.writeSlice(0xff51, []byte{0x29, 0x10})
-		cpu.Memory.writeSlice(0xff53, []byte{0xf0, 0x03})
-		cpu.Memory.writeSlice(0xff55, []byte{0x6c, 0x16, 0x03})
-		cpu.Memory.writeSlice(0xff58, []byte{0x6c, 0x14, 0x03})
+		cpu.writeSlice(0xff48, []uint8{0x48})
+		cpu.writeSlice(0xff49, []uint8{0x8a})
+		cpu.writeSlice(0xff4a, []uint8{0x48})
+		cpu.writeSlice(0xff4b, []uint8{0x98})
+		cpu.writeSlice(0xff4c, []uint8{0x48})
+		cpu.writeSlice(0xff4d, []uint8{0xba})
+		cpu.writeSlice(0xff4e, []uint8{0xbd, 0x04, 0x01})
+		cpu.writeSlice(0xff51, []uint8{0x29, 0x10})
+		cpu.writeSlice(0xff53, []uint8{0xf0, 0x03})
+		cpu.writeSlice(0xff55, []uint8{0x6c, 0x16, 0x03})
+		cpu.writeSlice(0xff58, []uint8{0x6c, 0x14, 0x03})
 
 		cpu.SP = 0xfd
 		cpu.PS = flagInterrupt
@@ -98,7 +98,7 @@ func TestWolfgangLorenz(t *testing.T) {
 
 				// print char
 				if cpu.PC == 0xffd2 {
-					cpu.Memory.Write(0x030c, 0x00)
+					cpu.write(0x030c, 0x00)
 					cpu.PC = cpu.popWord() + 1
 
 					c := petToAscTable[cpu.A]
@@ -116,12 +116,12 @@ func TestWolfgangLorenz(t *testing.T) {
 
 				// load
 				if cpu.PC == 0xe16f {
-					addr := word(cpu.Memory.Read(0x00bb), cpu.Memory.Read(0x00bc))
-					len := cpu.Memory.Read(0x00b7)
+					addr := cpu.readWord(0x00bb)
+					len := cpu.read(0x00b7)
 					testName = ""
 
 					for i := range uint16(len) {
-						testName += string(petToAscTable[cpu.Memory.Read(addr+i)])
+						testName += string(petToAscTable[cpu.read(addr+i)])
 					}
 
 					cpu.popWord()
