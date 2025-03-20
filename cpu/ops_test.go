@@ -1984,7 +1984,7 @@ func TestPhpPushesPAndUpdatesSP(t *testing.T) {
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
 	assert.Equal(t, uint8(0xfc), cpu.SP)
-	assert.Equal(t, uint8(0x55), cpu.read(0x01fd))
+	assert.Equal(t, uint8(0x75), cpu.read(0x01fd))
 }
 
 func TestPlaPullsIntoAAndUpdatesSP(t *testing.T) {
@@ -2070,7 +2070,7 @@ func TestPlpPullsIntoPAndUpdatesSP(t *testing.T) {
 	cpu.Step()
 
 	assert.Equal(t, uint16(0x0001), cpu.PC)
-	assert.Equal(t, Flags(0xaa)|flagUnused|flagBreak, cpu.PS)
+	assert.Equal(t, Flags(0xaa)|flagUnused, cpu.PS)
 	assert.Equal(t, uint8(0x00), cpu.A)
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)
@@ -2322,7 +2322,7 @@ func TestRtiPullsPCAndPSAndUpdatePC(t *testing.T) {
 	cpu.Step()
 
 	assert.Equal(t, uint16(0xc003), cpu.PC)
-	assert.Equal(t, flagCarry|flagBreak|flagUnused, cpu.PS)
+	assert.Equal(t, flagCarry|flagUnused, cpu.PS)
 	assert.Equal(t, uint8(0x00), cpu.A)
 	assert.Equal(t, uint8(0x00), cpu.X)
 	assert.Equal(t, uint8(0x00), cpu.Y)

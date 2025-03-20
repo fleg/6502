@@ -51,9 +51,9 @@ var ops = [256]*Op{
 	0x98: {"tya", amImp, 1, 2, tya, 0},
 
 	0x48: {"pha", amImp, 1, 3, pha, 0},
-	0x68: {"pla", amImp, 1, 3, pla, 0},
+	0x68: {"pla", amImp, 1, 4, pla, 0},
 	0x08: {"php", amImp, 1, 3, php, 0},
-	0x28: {"plp", amImp, 1, 3, plp, 0},
+	0x28: {"plp", amImp, 1, 4, plp, 0},
 
 	0x4c: {"jmp", amAbs, 3, 3, jmp, 0},
 	0x6c: {"jmp", amInd, 3, 5, jmp, 0},
@@ -94,7 +94,7 @@ var ops = [256]*Op{
 	0xe6: {"inc", amZeP, 2, 5, inc, 0},
 	0xf6: {"inc", amZeX, 2, 6, inc, 0},
 	0xee: {"inc", amAbs, 2, 6, inc, 0},
-	0xfe: {"inc", amAbX, 2, 5, inc, 0},
+	0xfe: {"inc", amAbX, 2, 7, inc, 0},
 
 	0xe8: {"inx", amImp, 1, 2, inx, 0},
 	0xc8: {"iny", amImp, 1, 2, iny, 0},
@@ -292,6 +292,19 @@ var ops = [256]*Op{
 	0x9e: {"shx", amAbY, 3, 5, shx, 0},
 	0x9c: {"shy", amAbX, 3, 5, shy, 0},
 	0x9b: {"shs", amAbY, 3, 5, shs, 0},
+
+	0x02: {"jam", amImp, 1, 1, jam, 0},
+	0x12: {"jam", amImp, 1, 1, jam, 0},
+	0x22: {"jam", amImp, 1, 1, jam, 0},
+	0x32: {"jam", amImp, 1, 1, jam, 0},
+	0x42: {"jam", amImp, 1, 1, jam, 0},
+	0x52: {"jam", amImp, 1, 1, jam, 0},
+	0x62: {"jam", amImp, 1, 1, jam, 0},
+	0x72: {"jam", amImp, 1, 1, jam, 0},
+	0x92: {"jam", amImp, 1, 1, jam, 0},
+	0xb2: {"jam", amImp, 1, 1, jam, 0},
+	0xd2: {"jam", amImp, 1, 1, jam, 0},
+	0xf2: {"jam", amImp, 1, 1, jam, 0},
 }
 
 func opcode2op(opcode uint8) *Op {

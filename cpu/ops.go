@@ -104,11 +104,12 @@ func pla(cpu *CPU, _ *Operand) {
 }
 
 func php(cpu *CPU, _ *Operand) {
-	cpu.push(uint8(cpu.PS))
+	cpu.push(uint8(cpu.PS | flagBreak | flagUnused))
 }
 
 func plp(cpu *CPU, _ *Operand) {
-	cpu.PS = Flags(cpu.pop()) | flagBreak | flagUnused
+	cpu.PS = Flags(cpu.pop()) | flagUnused
+	cpu.setFlag(flagBreak, false)
 }
 
 func jmp(cpu *CPU, operand *Operand) {
@@ -142,7 +143,7 @@ func rti(cpu *CPU, _ *Operand) {
 	cpu.PC = cpu.popWord()
 
 	cpu.setFlag(flagUnused, true)
-	cpu.setFlag(flagBreak, true)
+	cpu.setFlag(flagBreak, false)
 }
 
 func branch(cpu *CPU, operand *Operand, flag Flags, isSet bool) {
@@ -596,4 +597,9 @@ func shy(cpu *CPU, operand *Operand) {
 func shs(cpu *CPU, operand *Operand) {
 	cpu.SP = cpu.A & cpu.X
 	cpu.writeOperand(operand, cpu.SP&(1+wordMSB(operand.Address)))
+}
+
+func jam(cpu *CPU, _ *Operand) {
+	// TODO halt the cpu?
+	cpu.totalTicks += 10
 }
