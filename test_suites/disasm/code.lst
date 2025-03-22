@@ -1,0 +1,27 @@
+AS65 Assembler for R6502 [1.42].  Copyright 1994-2007, Frank A. Kingswood                                                Page    1
+------------------------------------------------------------ code.a65 ------------------------------------------------------------
+
+18 lines read, no errors in pass 1.
+                                code
+0000 =                          org $0
+                        
+0000 : 48                       pha
+0001 : 68                       pla
+0002 : 6a                       ror a
+0003 : a910                     lda #$10
+0005 : a510                     lda $10
+0007 : 9410                     sty $10,x
+0009 : b610                     ldx $10,y
+000b : f002                     beq *+4
+000d : d0fa                     bne *-4
+000f : 4ccdab                   jmp $abcd
+0012 : 9d0130                   sta $3001,x
+0015 : 390140                   and $4001,y
+0018 : 6ccdab                   jmp ($abcd)
+001b : a140                     lda ($40,x)
+001d : b140                     lda ($40),y
+                        
+No errors in pass 2.
+Wrote binary from address $0000 through $001e.
+Total size 31 bytes.
+

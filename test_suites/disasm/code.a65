@@ -1,0 +1,18 @@
+        code
+        org $0
+
+        pha
+        pla
+        ror a
+        lda #$10
+        lda $10
+        sty $10,x
+        ldx $10,y
+        beq *+4
+        bne *-4
+        jmp $abcd
+        sta $3001,x
+        and $4001,y
+        jmp ($abcd)
+        lda ($40,x)
+        lda ($40),y
