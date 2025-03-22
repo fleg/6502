@@ -19,11 +19,14 @@ type CPU struct {
 	memory     Memory
 	totalTicks uint64
 	totalOps   uint64
+
+	isDecimalEnabled bool
 }
 
 func New(mem Memory) *CPU {
 	return &CPU{
-		memory: mem,
+		memory:           mem,
+		isDecimalEnabled: true,
 	}
 }
 
@@ -120,4 +123,12 @@ func (cpu *CPU) writeOperand(operand *Operand, val uint8) {
 	} else {
 		cpu.write(operand.Address, val)
 	}
+}
+
+func (cpu *CPU) DisableDecimal() {
+	cpu.isDecimalEnabled = false
+}
+
+func (cpu *CPU) EnableDecimal() {
+	cpu.isDecimalEnabled = true
 }

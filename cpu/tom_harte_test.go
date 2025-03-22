@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type tomHarteState struct {
+type singleStepState struct {
 	PC  uint16     `json:"pc"`
 	SP  uint8      `json:"s"`
 	A   uint8      `json:"a"`
@@ -19,16 +19,30 @@ type tomHarteState struct {
 	RAM [][]uint16 `json:"ram"`
 }
 
-type tomHarteTestCase struct {
-	Name    string        `json:"name"`
-	Initial tomHarteState `json:"initial"`
-	Final   tomHarteState `json:"final"`
-	Cycles  [][]any       `json:"cycles"`
+type singleStepTestCase struct {
+	Name    string          `json:"name"`
+	Initial singleStepState `json:"initial"`
+	Final   singleStepState `json:"final"`
+	Cycles  [][]any         `json:"cycles"`
 }
 
-type tomHarteTestSuite []tomHarteTestCase
+type singleStepTestSuite []singleStepTestCase
 
-func TestTomHarte(t *testing.T) {
+func TestTomHarte6502(t *testing.T) {
+	runTomHarteTest(t, "../test_suites/tom_harte/6502/v1", func() *CPU {
+		return NewWithRAM()
+	})
+}
+
+func TestTomHarteNES(t *testing.T) {
+	runTomHarteTest(t, "../test_suites/tom_harte/nes6502/v1", func() *CPU {
+		cpu := NewWithRAM()
+		cpu.DisableDecimal()
+		return cpu
+	})
+}
+
+func runTomHarteTest(t *testing.T, path string, getCPU func() *CPU) {
 	for i := range 256 {
 		switch i {
 		case 0x93, 0x9f, 0x9e, 0x9c, 0x9b:
@@ -37,11 +51,10 @@ func TestTomHarte(t *testing.T) {
 			continue
 		}
 
-		p := fmt.Sprintf("../test_suites/tom_harte/6502/v1/%02x.json", i)
-		data, err := os.ReadFile(p)
+		data, err := os.ReadFile(fmt.Sprintf("%s/%02x.json", path, i))
 		assert.NoError(t, err)
 
-		var testSuite tomHarteTestSuite
+		var testSuite singleStepTestSuite
 		err = json.Unmarshal(data, &testSuite)
 		assert.NoError(t, err)
 
@@ -55,7 +68,7 @@ func TestTomHarte(t *testing.T) {
 				continue
 			}
 
-			cpu := NewWithRAM()
+			cpu := getCPU()
 
 			cpu.PC = tc.Initial.PC
 			cpu.SP = tc.Initial.SP

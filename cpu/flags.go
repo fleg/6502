@@ -57,3 +57,7 @@ func (cpu *CPU) updateOverflowFlag(a uint8, b uint8, c uint8) {
 
 	cpu.setFlag(flagOverflow, overflow)
 }
+
+func (cpu *CPU) getDecimal() bool {
+	return cpu.getFlag(flagDecimal) && cpu.isDecimalEnabled
+}

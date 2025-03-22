@@ -343,7 +343,7 @@ func bit(cpu *CPU, operand *Operand) {
 func adc(cpu *CPU, operand *Operand) {
 	val := cpu.readOperand(operand)
 
-	if cpu.getFlag(flagDecimal) {
+	if cpu.getDecimal() {
 		loCarry := uint8(0)
 		hiCarry := false
 		loAdj := uint8(0)
@@ -386,7 +386,7 @@ func adc(cpu *CPU, operand *Operand) {
 func sbc(cpu *CPU, operand *Operand) {
 	val := cpu.readOperand(operand)
 
-	if cpu.getFlag(flagDecimal) {
+	if cpu.getDecimal() {
 		loCarry := uint8(1)
 		hiCarry := false
 		loAdj := uint8(0)
@@ -511,7 +511,7 @@ func asr(cpu *CPU, operand *Operand) {
 func arr(cpu *CPU, operand *Operand) {
 	val := cpu.readOperand(operand)
 
-	if cpu.getFlag(flagDecimal) {
+	if cpu.getDecimal() {
 		// undocumented magic
 		// https://github.com/vbt1/fba_saturn/blob/d1dade09813b397c6c3abab418842c109c7e2bd2/m6502.new/ill02.h#L71
 		res := uint16(val) & uint16(cpu.A)
