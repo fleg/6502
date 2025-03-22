@@ -1,1 +1,10 @@
-TODO: https://github.com/SingleStepTests/65x02 is huge (~5GB), add as submodule or smth 
+https://github.com/SingleStepTests/65x02 is huge (~5GB)
+
+what i've tried:
+- add it as submodule is very slow
+- prepack json's with xz/gz and unpack on each test is slow
+
+what try next:
+- since only cycles count is required try to drop "cycles" array, should save a lot of space
+- prepack json's with xz/gz and unpack it once with some init test data script
+- repack json's to a binary format
