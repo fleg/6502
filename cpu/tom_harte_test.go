@@ -51,55 +51,57 @@ func runTomHarteTest(t *testing.T, path string, getCPU func() *CPU) {
 			continue
 		}
 
-		data, err := os.ReadFile(fmt.Sprintf("%s/%02x.json", path, i))
-		assert.NoError(t, err)
+		t.Run(fmt.Sprintf("%02x_%s", i, ops[i].Name), func(t *testing.T) {
+			t.Parallel()
 
-		var testSuite singleStepTestSuite
-		err = json.Unmarshal(data, &testSuite)
-		assert.NoError(t, err)
+			data, err := os.ReadFile(fmt.Sprintf("%s/%02x.json", path, i))
+			assert.NoError(t, err)
 
-		for _, tc := range testSuite {
-			if tc.Name == "20 55 13" {
-				// really weird self modifying instruction edge case
-				// skip it for now
-				// more details below
-				// https://github.com/SingleStepTests/ProcessorTests/issues/65
-				// https://github.com/NationalSecurityAgency/ghidra/issues/5871
-				continue
+			var testSuite singleStepTestSuite
+			err = json.Unmarshal(data, &testSuite)
+			assert.NoError(t, err)
+
+			for _, tc := range testSuite {
+				if tc.Name == "20 55 13" {
+					// really weird self modifying instruction edge case
+					// skip it for now
+					// more details below
+					// https://github.com/SingleStepTests/ProcessorTests/issues/65
+					// https://github.com/NationalSecurityAgency/ghidra/issues/5871
+					continue
+				}
+
+				cpu := getCPU()
+
+				cpu.PC = tc.Initial.PC
+				cpu.SP = tc.Initial.SP
+				cpu.A = tc.Initial.A
+				cpu.X = tc.Initial.X
+				cpu.Y = tc.Initial.Y
+				cpu.PS = Flags(tc.Initial.PS)
+
+				for _, cell := range tc.Initial.RAM {
+					cpu.write(cell[0], uint8(cell[1]))
+				}
+
+				cpu.Step()
+
+				assert.Equal(t, uint64(1), cpu.totalOps, tc.Name)
+				assert.Equal(t, uint64(len(tc.Cycles)), cpu.totalTicks, tc.Name)
+				assert.Equal(t, tc.Final.PC, cpu.PC, tc.Name)
+				assert.Equal(t, tc.Final.SP, cpu.SP, tc.Name)
+				assert.Equal(t, tc.Final.A, cpu.A, tc.Name)
+				assert.Equal(t, tc.Final.X, cpu.X, tc.Name)
+				assert.Equal(t, tc.Final.Y, cpu.Y, tc.Name)
+				assert.Equal(t, Flags(tc.Final.PS), cpu.PS, tc.Name)
+
+				for _, cell := range tc.Final.RAM {
+					addr := cell[0]
+					expected := uint8(cell[1])
+					actual := cpu.read(addr)
+					assert.Equal(t, expected, actual, "%s, ram at 0x%04x", tc.Name, addr)
+				}
 			}
-
-			cpu := getCPU()
-
-			cpu.PC = tc.Initial.PC
-			cpu.SP = tc.Initial.SP
-			cpu.A = tc.Initial.A
-			cpu.X = tc.Initial.X
-			cpu.Y = tc.Initial.Y
-			cpu.PS = Flags(tc.Initial.PS)
-
-			for _, cell := range tc.Initial.RAM {
-				cpu.write(cell[0], uint8(cell[1]))
-			}
-
-			cpu.Step()
-
-			assert.Equal(t, uint64(1), cpu.totalOps, tc.Name)
-			assert.Equal(t, uint64(len(tc.Cycles)), cpu.totalTicks, tc.Name)
-			assert.Equal(t, tc.Final.PC, cpu.PC, tc.Name)
-			assert.Equal(t, tc.Final.SP, cpu.SP, tc.Name)
-			assert.Equal(t, tc.Final.A, cpu.A, tc.Name)
-			assert.Equal(t, tc.Final.X, cpu.X, tc.Name)
-			assert.Equal(t, tc.Final.Y, cpu.Y, tc.Name)
-			assert.Equal(t, Flags(tc.Final.PS), cpu.PS, tc.Name)
-
-			for _, cell := range tc.Final.RAM {
-				addr := cell[0]
-				expected := uint8(cell[1])
-				actual := cpu.read(addr)
-				assert.Equal(t, expected, actual, "%s, ram at 0x%04x", tc.Name, addr)
-			}
-		}
-
-		t.Logf("done %02x (%s)", i, ops[i].Name)
+		})
 	}
 }

@@ -1,12 +1,26 @@
 package cpu
 
 import (
-	"fmt"
+	"bytes"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func klausDormannLog(t *testing.T, output *bytes.Buffer) {
+	for {
+		line, err := output.ReadString('\n')
+		if err != nil {
+			break
+		}
+		clean := strings.Trim(line, "\r\n")
+		if len(clean) > 0 {
+			t.Log(clean)
+		}
+	}
+}
 
 func TestKlausDormannFunctional(t *testing.T) {
 	bin, err := os.ReadFile("../test_suites/klaus_dormann/bin/6502_functional_test.bin")
@@ -21,13 +35,14 @@ func TestKlausDormannFunctional(t *testing.T) {
 
 	prevPC := cpu.PC
 	fail := false
+	output := bytes.Buffer{}
 
 	for {
 		cpu.Step()
 
 		// print char
 		if cpu.PC == 0x455c {
-			fmt.Printf("%c", cpu.A)
+			output.WriteByte(cpu.A)
 		}
 
 		// get char
@@ -48,9 +63,15 @@ func TestKlausDormannFunctional(t *testing.T) {
 		prevPC = cpu.PC
 	}
 
+	klausDormannLog(t, &output)
+
 	if fail {
 		t.Fail()
 	}
+
+	expectedTicks := uint64(101_170_656)
+
+	assert.Equal(t, expectedTicks, cpu.totalTicks)
 }
 
 func TestKlausDormannBCD(t *testing.T) {
@@ -75,6 +96,10 @@ func TestKlausDormannBCD(t *testing.T) {
 	if cpu.read(0x000b) == 0x01 {
 		t.Fail()
 	}
+
+	expectedTicks := uint64(46_089_505)
+
+	assert.Equal(t, expectedTicks, cpu.totalTicks)
 }
 
 func TestKlausDormannInterrupt(t *testing.T) {
@@ -90,6 +115,7 @@ func TestKlausDormannInterrupt(t *testing.T) {
 
 	prevPC := cpu.PC
 	fail := false
+	output := bytes.Buffer{}
 
 	const nmiMask = 0x02
 	const irqMask = 0x01
@@ -116,7 +142,7 @@ func TestKlausDormannInterrupt(t *testing.T) {
 
 		// print char
 		if cpu.PC == 0x09e0 {
-			fmt.Printf("%c", cpu.A)
+			output.WriteByte(cpu.A)
 		}
 
 		// get char
@@ -137,7 +163,13 @@ func TestKlausDormannInterrupt(t *testing.T) {
 		prevPC = cpu.PC
 	}
 
+	klausDormannLog(t, &output)
+
 	if fail {
 		t.Fail()
 	}
+
+	expectedTicks := uint64(5399)
+
+	assert.Equal(t, expectedTicks, cpu.totalTicks)
 }
