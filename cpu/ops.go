@@ -132,10 +132,7 @@ func brk(cpu *CPU, _ *Operand) {
 	// the BRK instruction is ignored
 
 	cpu.nextPC()
-	cpu.pushWord(cpu.PC)
-	cpu.push(uint8(cpu.PS | flagBreak | flagUnused))
-	cpu.setFlag(flagInterrupt, true)
-	cpu.PC = cpu.readWord(irqVector)
+	interrupt(cpu, cpu.PS|flagBreak|flagUnused, irqVector)
 }
 
 func rti(cpu *CPU, _ *Operand) {

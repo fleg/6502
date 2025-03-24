@@ -1,19 +1,20 @@
 package cpu
 
-func nmi(cpu *CPU) {
+func interrupt(cpu *CPU, flags Flags, vec uint16) {
 	cpu.pushWord(cpu.PC)
-	cpu.push(uint8(cpu.PS | flagUnused))
+	cpu.push(uint8(flags))
 	cpu.setFlag(flagInterrupt, true)
-	cpu.PC = cpu.readWord(nmiVector)
+	cpu.PC = cpu.readWord(vec)
+}
+
+func nmi(cpu *CPU) {
+	interrupt(cpu, cpu.PS|flagUnused, nmiVector)
 
 	cpu.totalTicks += 7
 }
 
 func irq(cpu *CPU) {
-	cpu.pushWord(cpu.PC)
-	cpu.push(uint8(cpu.PS | flagUnused))
-	cpu.setFlag(flagInterrupt, true)
-	cpu.PC = cpu.readWord(irqVector)
+	interrupt(cpu, cpu.PS|flagUnused, irqVector)
 
 	cpu.totalTicks += 7
 }
