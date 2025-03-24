@@ -93,7 +93,7 @@ code_segment = $400
 
 ;report errors through I/O channel (0=use standard self trap loops, 1=include
 ;report.i65 as I/O channel)
-report = 0
+report = 1
 
         noopt       ;do not take shortcuts
 
@@ -213,6 +213,7 @@ irq_count   ds  1           ;separation-1 = instructions between interrupts
 brk_count   ds  1
 ;expected interrupt mask
 I_src       ds  1           ;bit: 0=BRK, 1=IRQ, 2=NMI
+test_case   ds  1
 data_bss
 
         code

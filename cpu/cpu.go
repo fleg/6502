@@ -3,6 +3,7 @@ package cpu
 const (
 	resetVector = 0xfffc
 	irqVector   = 0xfffe
+	nmiVector   = 0xfffa
 	stackInit   = 0xfd
 	stackBase   = 0x0100
 	magic       = 0xee
@@ -21,6 +22,8 @@ type CPU struct {
 	totalOps   uint64
 
 	isDecimalEnabled bool
+	isNmiTriggered   bool
+	isIrqTriggered   bool
 }
 
 func New(mem Memory) *CPU {
@@ -85,6 +88,16 @@ func (cpu *CPU) readWordWithoutPageCross(addr uint16) uint16 {
 }
 
 func (cpu *CPU) Step() {
+	if cpu.isNmiTriggered {
+		cpu.isNmiTriggered = false
+		nmi(cpu)
+	}
+
+	if cpu.isIrqTriggered {
+		cpu.isIrqTriggered = false
+		irq(cpu)
+	}
+
 	opcode := cpu.readPC()
 	op := opcode2op(opcode)
 
@@ -131,4 +144,16 @@ func (cpu *CPU) DisableDecimal() {
 
 func (cpu *CPU) EnableDecimal() {
 	cpu.isDecimalEnabled = true
+}
+
+func (cpu *CPU) TriggerNMI() bool {
+	cpu.isNmiTriggered = true
+	return cpu.isNmiTriggered
+}
+
+func (cpu *CPU) TriggerIRQ() bool {
+	if !cpu.getFlag(flagInterrupt) {
+		cpu.isIrqTriggered = true
+	}
+	return cpu.isIrqTriggered
 }
