@@ -45,8 +45,11 @@ func (cpu *CPU) Reset() {
 	cpu.X = 0
 	cpu.Y = 0
 	cpu.PS = 0
+	cpu.TotalTicks = 0
+	cpu.TotalOps = 0
 
 	cpu.setFlag(flagInterrupt, true)
+	cpu.TotalTicks += 7
 }
 
 func (cpu *CPU) nextPC() uint16 {
