@@ -49,6 +49,7 @@ func (cpu *CPU) Reset() {
 	cpu.TotalOps = 0
 
 	cpu.setFlag(flagInterrupt, true)
+	cpu.setFlag(flagUnused, true)
 	cpu.TotalTicks += 7
 }
 
