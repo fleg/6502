@@ -3,57 +3,57 @@ package cpu
 type AddressMode uint8
 
 const (
-	amImp AddressMode = iota
-	amAcc
-	amImm
-	amZeP
-	amZeX
-	amZeY
-	amRel
-	amAbs
-	amAbX
-	amAbY
-	amInd
-	amInX
-	amInY
+	AmImp AddressMode = iota
+	AmAcc
+	AmImm
+	AmZeP
+	AmZeX
+	AmZeY
+	AmRel
+	AmAbs
+	AmAbX
+	AmAbY
+	AmInd
+	AmInX
+	AmInY
 )
 
 // The processor is little endian and expects
 // addresses to be stored in memory least significant byte first.
 func (cpu *CPU) fetchOperandAddress(am AddressMode) (uint16, bool) {
 	switch am {
-	case amImp, amAcc:
+	case AmImp, AmAcc:
 		return 0, false
-	case amImm:
+	case AmImm:
 		return cpu.nextPC(), false
-	case amZeP:
+	case AmZeP:
 		return uint16(cpu.readPC()), false
-	case amZeX:
+	case AmZeX:
 		addr := cpu.readPC() + cpu.X
 		return uint16(addr), false
-	case amZeY:
+	case AmZeY:
 		addr := cpu.readPC() + cpu.Y
 		return uint16(addr), false
-	case amRel:
+	case AmRel:
 		offset := int8(cpu.readPC())
 		addr := uint16(int32(cpu.PC) + int32(offset))
 		return addr, isPageCrossed(cpu.PC, addr)
-	case amAbs:
+	case AmAbs:
 		return cpu.readPCWord(), false
-	case amAbX:
+	case AmAbX:
 		base := cpu.readPCWord()
 		addr := base + uint16(cpu.X)
 		return addr, isPageCrossed(base, addr)
-	case amAbY:
+	case AmAbY:
 		base := cpu.readPCWord()
 		addr := base + uint16(cpu.Y)
 		return addr, isPageCrossed(base, addr)
-	case amInd:
+	case AmInd:
 		return cpu.readWordWithoutPageCross(cpu.readPCWord()), false
-	case amInX:
+	case AmInX:
 		addr := uint16(cpu.readPC() + cpu.X)
 		return cpu.readWordWithoutPageCross(addr), false
-	case amInY:
+	case AmInY:
 		base := cpu.readWordWithoutPageCross(uint16(cpu.readPC()))
 		addr := base + uint16(cpu.Y)
 		return addr, isPageCrossed(base, addr)

@@ -130,7 +130,7 @@ func (cpu *CPU) fetchOperand(am AddressMode) *Operand {
 }
 
 func (cpu *CPU) readOperand(operand *Operand) uint8 {
-	if operand.AddressMode == amAcc {
+	if operand.AddressMode == AmAcc {
 		return cpu.A
 	}
 
@@ -138,7 +138,7 @@ func (cpu *CPU) readOperand(operand *Operand) uint8 {
 }
 
 func (cpu *CPU) writeOperand(operand *Operand, val uint8) {
-	if operand.AddressMode == amAcc {
+	if operand.AddressMode == AmAcc {
 		cpu.A = val
 	} else {
 		cpu.write(operand.Address, val)

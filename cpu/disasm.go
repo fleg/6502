@@ -31,34 +31,34 @@ func Disasm(bin []uint8) string {
 
 		code += "    " + op.Name
 
-		if op.AddressMode != amImp {
+		if op.AddressMode != AmImp {
 			code += " "
 		}
 
 		switch op.AddressMode {
-		case amAcc:
+		case AmAcc:
 			code += "a"
-		case amImm:
+		case AmImm:
 			code += fmt.Sprintf("#$%02x", arg)
-		case amZeP:
+		case AmZeP:
 			code += fmt.Sprintf("$%02x", arg)
-		case amZeX:
+		case AmZeX:
 			code += fmt.Sprintf("$%02x,x", arg)
-		case amZeY:
+		case AmZeY:
 			code += fmt.Sprintf("$%02x,y", arg)
-		case amRel:
+		case AmRel:
 			code += fmt.Sprintf("*%+d", int8(arg)+2)
-		case amAbs:
+		case AmAbs:
 			code += fmt.Sprintf("$%04x", arg)
-		case amAbX:
+		case AmAbX:
 			code += fmt.Sprintf("$%04x,x", arg)
-		case amAbY:
+		case AmAbY:
 			code += fmt.Sprintf("$%04x,y", arg)
-		case amInd:
+		case AmInd:
 			code += fmt.Sprintf("($%04x)", arg)
-		case amInX:
+		case AmInX:
 			code += fmt.Sprintf("($%02x,x)", arg)
-		case amInY:
+		case AmInY:
 			code += fmt.Sprintf("($%02x),y", arg)
 		}
 
