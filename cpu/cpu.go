@@ -87,7 +87,7 @@ func (cpu *CPU) readWordWithoutPageCross(addr uint16) uint16 {
 	return word(lo, hi)
 }
 
-func (cpu *CPU) Step() {
+func (cpu *CPU) Step() *Op {
 	if cpu.isNmiTriggered {
 		cpu.isNmiTriggered = false
 		nmi(cpu)
@@ -102,7 +102,7 @@ func (cpu *CPU) Step() {
 	op := opcode2op(opcode)
 
 	operand := cpu.fetchOperand(op.AddressMode)
-	op.Do(cpu, operand)
+	op.do(cpu, operand)
 
 	cpu.totalTicks += uint64(op.Ticks)
 	if operand.PageCrossed {
@@ -110,6 +110,8 @@ func (cpu *CPU) Step() {
 	}
 
 	cpu.totalOps += 1
+
+	return op
 }
 
 func (cpu *CPU) fetchOperand(am AddressMode) *Operand {

@@ -5,7 +5,7 @@ type Op struct {
 	AddressMode   AddressMode
 	Size          uint16
 	Ticks         uint8
-	Do            func(*CPU, *Operand)
+	do            func(*CPU, *Operand)
 	PageCrossTick uint8
 }
 
