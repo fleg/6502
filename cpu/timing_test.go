@@ -29,6 +29,6 @@ func TestTiming(t *testing.T) {
 	expectedTicks := uint64(1141)
 	expectedOps := uint64(299)
 
-	assert.Equal(t, expectedTicks, cpu.totalTicks)
-	assert.Equal(t, expectedOps, cpu.totalOps)
+	assert.Equal(t, expectedTicks, cpu.TotalTicks)
+	assert.Equal(t, expectedOps, cpu.TotalOps)
 }

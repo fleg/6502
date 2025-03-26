@@ -147,9 +147,9 @@ func branch(cpu *CPU, operand *Operand, flag Flags, isSet bool) {
 	if isSet == cpu.getFlag(flag) {
 		cpu.PC = operand.Address
 
-		cpu.totalTicks += 1
+		cpu.TotalTicks += 1
 		if operand.PageCrossed {
-			cpu.totalTicks += 1
+			cpu.TotalTicks += 1
 		}
 	}
 }
@@ -598,5 +598,5 @@ func shs(cpu *CPU, operand *Operand) {
 
 func jam(cpu *CPU, _ *Operand) {
 	// TODO halt the cpu?
-	cpu.totalTicks += 10
+	cpu.TotalTicks += 10
 }

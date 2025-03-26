@@ -86,8 +86,8 @@ func runTomHarteTest(t *testing.T, path string, getCPU func() *CPU) {
 
 				cpu.Step()
 
-				assert.Equal(t, uint64(1), cpu.totalOps, tc.Name)
-				assert.Equal(t, uint64(len(tc.Cycles)), cpu.totalTicks, tc.Name)
+				assert.Equal(t, uint64(1), cpu.TotalOps, tc.Name)
+				assert.Equal(t, uint64(len(tc.Cycles)), cpu.TotalTicks, tc.Name)
 				assert.Equal(t, tc.Final.PC, cpu.PC, tc.Name)
 				assert.Equal(t, tc.Final.SP, cpu.SP, tc.Name)
 				assert.Equal(t, tc.Final.A, cpu.A, tc.Name)

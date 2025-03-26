@@ -17,9 +17,10 @@ type CPU struct {
 	Y  uint8
 	PS Flags
 
-	memory     Memory
-	totalTicks uint64
-	totalOps   uint64
+	TotalTicks uint64
+	TotalOps   uint64
+
+	memory Memory
 
 	isDecimalEnabled bool
 	isNmiTriggered   bool
@@ -104,12 +105,12 @@ func (cpu *CPU) Step() *Op {
 	operand := cpu.fetchOperand(op.AddressMode)
 	op.do(cpu, operand)
 
-	cpu.totalTicks += uint64(op.Ticks)
+	cpu.TotalTicks += uint64(op.Ticks)
 	if operand.PageCrossed {
-		cpu.totalTicks += uint64(op.PageCrossTick)
+		cpu.TotalTicks += uint64(op.PageCrossTick)
 	}
 
-	cpu.totalOps += 1
+	cpu.TotalOps += 1
 
 	return op
 }

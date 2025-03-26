@@ -71,7 +71,7 @@ func TestKlausDormannFunctional(t *testing.T) {
 
 	expectedTicks := uint64(101_170_656)
 
-	assert.Equal(t, expectedTicks, cpu.totalTicks)
+	assert.Equal(t, expectedTicks, cpu.TotalTicks)
 }
 
 func TestKlausDormannBCD(t *testing.T) {
@@ -99,7 +99,7 @@ func TestKlausDormannBCD(t *testing.T) {
 
 	expectedTicks := uint64(46_089_505)
 
-	assert.Equal(t, expectedTicks, cpu.totalTicks)
+	assert.Equal(t, expectedTicks, cpu.TotalTicks)
 }
 
 func TestKlausDormannInterrupt(t *testing.T) {
@@ -171,5 +171,5 @@ func TestKlausDormannInterrupt(t *testing.T) {
 
 	expectedTicks := uint64(5399)
 
-	assert.Equal(t, expectedTicks, cpu.totalTicks)
+	assert.Equal(t, expectedTicks, cpu.TotalTicks)
 }

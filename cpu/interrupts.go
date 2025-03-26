@@ -10,11 +10,11 @@ func interrupt(cpu *CPU, flags Flags, vec uint16) {
 func nmi(cpu *CPU) {
 	interrupt(cpu, cpu.PS|flagUnused, nmiVector)
 
-	cpu.totalTicks += 7
+	cpu.TotalTicks += 7
 }
 
 func irq(cpu *CPU) {
 	interrupt(cpu, cpu.PS|flagUnused, irqVector)
 
-	cpu.totalTicks += 7
+	cpu.TotalTicks += 7
 }
