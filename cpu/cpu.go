@@ -171,3 +171,7 @@ func (cpu *CPU) TriggerIRQ() bool {
 	}
 	return cpu.isIrqTriggered
 }
+
+func (cpu *CPU) SetBeforeOpCallback(cb OpCallback) {
+	cpu.beforeOpCallback = cb
+}
