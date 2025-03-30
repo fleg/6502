@@ -9,6 +9,8 @@ const (
 	magic       = 0xee
 )
 
+type OpCallback func(*Op, *Operand)
+
 type CPU struct {
 	PC uint16
 	SP uint8
@@ -25,6 +27,8 @@ type CPU struct {
 	isDecimalEnabled bool
 	isNmiTriggered   bool
 	isIrqTriggered   bool
+
+	beforeOpCallback OpCallback
 }
 
 func New(mem Memory) *CPU {
@@ -92,7 +96,7 @@ func (cpu *CPU) readWordWithoutPageCross(addr uint16) uint16 {
 	return word(lo, hi)
 }
 
-func (cpu *CPU) Step() *Op {
+func (cpu *CPU) Step() {
 	if cpu.isNmiTriggered {
 		cpu.isNmiTriggered = false
 		nmi(cpu)
@@ -107,6 +111,11 @@ func (cpu *CPU) Step() *Op {
 	op := opcode2op(opcode)
 
 	operand := cpu.fetchOperand(op.AddressMode)
+
+	if cpu.beforeOpCallback != nil {
+		cpu.beforeOpCallback(op, operand)
+	}
+
 	op.do(cpu, operand)
 
 	cpu.TotalTicks += uint64(op.Ticks)
@@ -115,8 +124,6 @@ func (cpu *CPU) Step() *Op {
 	}
 
 	cpu.TotalOps += 1
-
-	return op
 }
 
 func (cpu *CPU) fetchOperand(am AddressMode) *Operand {
