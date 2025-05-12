@@ -27,8 +27,13 @@ type CPU struct {
 	isDecimalEnabled bool
 	isNmiTriggered   bool
 	isIrqTriggered   bool
+}
 
-	beforeOpCallback OpCallback
+type StepInfo struct {
+	Op                 *Op
+	Operand            *Operand
+	OperandValueBefore uint8
+	OperandValueAfter  uint8
 }
 
 func New(mem Memory) *CPU {
@@ -96,7 +101,9 @@ func (cpu *CPU) readWordWithoutPageCross(addr uint16) uint16 {
 	return word(lo, hi)
 }
 
-func (cpu *CPU) Step() {
+func (cpu *CPU) Step() *StepInfo {
+	si := StepInfo{}
+
 	if cpu.isNmiTriggered {
 		cpu.isNmiTriggered = false
 		nmi(cpu)
@@ -109,21 +116,22 @@ func (cpu *CPU) Step() {
 
 	opcode := cpu.readPC()
 	op := opcode2op(opcode)
-
 	operand := cpu.fetchOperand(op.AddressMode)
-
-	if cpu.beforeOpCallback != nil {
-		cpu.beforeOpCallback(op, operand)
-	}
+	si.Op = op
+	si.Operand = operand
+	si.OperandValueBefore = cpu.readOperand(operand)
 
 	op.do(cpu, operand)
 
+	si.OperandValueAfter = cpu.readOperand(operand)
 	cpu.TotalTicks += uint64(op.Ticks)
 	if operand.PageCrossed {
 		cpu.TotalTicks += uint64(op.PageCrossTick)
 	}
 
 	cpu.TotalOps += 1
+
+	return &si
 }
 
 func (cpu *CPU) fetchOperand(am AddressMode) *Operand {
@@ -170,8 +178,4 @@ func (cpu *CPU) TriggerIRQ() bool {
 		cpu.isIrqTriggered = true
 	}
 	return cpu.isIrqTriggered
-}
-
-func (cpu *CPU) SetBeforeOpCallback(cb OpCallback) {
-	cpu.beforeOpCallback = cb
 }
